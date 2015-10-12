@@ -5,4 +5,4 @@
 .DS_Store
 /build
 /captures
-/app/src/main/java/com/seliverstov/popularmovies/api/TheMovieDB.java
+/app/src/main/java/com/seliverstov/popularmovies/rest/TMDBKey.java
