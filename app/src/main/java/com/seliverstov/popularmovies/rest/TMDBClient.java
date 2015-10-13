@@ -1,5 +1,7 @@
 package com.seliverstov.popularmovies.rest;
 
+import android.util.Log;
+
 import com.seliverstov.popularmovies.rest.model.Movie;
 import com.seliverstov.popularmovies.rest.model.Movies;
 import com.seliverstov.popularmovies.rest.service.TMDBService;
@@ -36,7 +38,9 @@ public class TMDBClient {
     public List<Movie> listMovies(String sort_by, int page){
         try{
             Call<Movies> call = this.service.getMovies(TMDBKey.API_KEY, sort_by, (page <= 0) ? 1 : page);
-            Movies movies = call.execute().body();
+            Response<Movies> res = call.execute();
+            Log.i(this.getClass().getSimpleName(),res.raw().request().urlString());
+            Movies movies = res.body();
             return movies.getResults();
         }catch (IOException e){
             e.printStackTrace();

@@ -1,5 +1,8 @@
 package com.seliverstov.popularmovies.rest.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +12,19 @@ import java.util.Map;
  * Created by a.g.seliverstov on 12.10.2015.
  */
 public class Movies {
+    @SerializedName("page")
+    @Expose
     private Integer page;
+    @SerializedName("results")
+    @Expose
     private List<Movie> results = new ArrayList<Movie>();
+    @SerializedName("total_pages")
+    @Expose
     private Integer totalPages;
+    @SerializedName("total_results")
+    @Expose
     private Integer totalResults;
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
 
     public Integer getPage() {
         return page;
@@ -45,13 +56,5 @@ public class Movies {
 
     public void setTotalResults(Integer totalResults) {
         this.totalResults = totalResults;
-    }
-
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
-    }
-
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
     }
 }
