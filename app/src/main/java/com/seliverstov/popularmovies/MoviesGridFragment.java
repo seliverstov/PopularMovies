@@ -1,10 +1,8 @@
 package com.seliverstov.popularmovies;
 
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,12 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.seliverstov.popularmovies.rest.TMDBClient;
 import com.seliverstov.popularmovies.rest.model.Movie;
 import com.squareup.picasso.Picasso;
 
@@ -27,6 +25,7 @@ import java.util.List;
  * Created by a.g.seliverstov on 12.10.2015.
  */
 public class MoviesGridFragment extends Fragment {
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,6 +39,8 @@ public class MoviesGridFragment extends Fragment {
 
             }
         });
+
+
 
         final ArrayAdapter<Movie> adapter = new ArrayAdapter<Movie>(context,android.R.layout.simple_list_item_1){
             @Override
@@ -63,24 +64,32 @@ public class MoviesGridFragment extends Fragment {
             }
         };
 
-        AsyncTask<Integer, Void, List<Movie>> aTask = new AsyncTask<Integer, Void, List<Movie>>(){
+
+
+        gv.setOnScrollListener(new AbsListView.OnScrollListener() {
+            private int page = 0;
+            private int visibleTreshold = 2;
+            private AsyncTask<Integer,Void,List<Movie>> loadTask;
+
             @Override
-            protected List<Movie> doInBackground(Integer... params) {
-                int page = (params.length > 0 && params[0] > 0) ? params[0]: 1;
-                List<Movie> result = new TMDBClient().listMostPopularMovies(page);
-                Log.i(MoviesGridFragment.class.toString(),"Get "+result.size()+" movies!");
-                return result;
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
             }
 
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
-            protected void onPostExecute(List<Movie> movies) {
-                adapter.clear();
-                adapter.addAll(movies);
-            }
-        };
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (loadTask == null || loadTask.getStatus() == AsyncTask.Status.FINISHED){
+                    if (totalItemCount - visibleItemCount <= (firstVisibleItem + visibleTreshold)) {
+                        Log.i(this.getClass().getSimpleName(),"Load page "+page);
+                        page++;
+                        AsyncTask<Integer, Void, List<Movie>> aTask = new LoadMoviesTask(adapter);
+                        aTask.execute(page);
+                    }
+                }
 
-        aTask.execute(1);
+            }
+        });
+
         gv.setAdapter(adapter);
         return view;
     }
