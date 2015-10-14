@@ -24,7 +24,7 @@ import com.squareup.picasso.Picasso;
  * Created by a.g.seliverstov on 12.10.2015.
  */
 public class MoviesGridFragment extends Fragment {
-    private static final String DEBUG_TAG = MoviesGridFragment.class.getSimpleName();
+    private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
     private int VISIBLE_TRESHOLD = 2;
     private MovieLoader movieLoader;
 
@@ -48,17 +48,18 @@ public class MoviesGridFragment extends Fragment {
                 ImageView imageView;
                 if (convertView==null) {
                     imageView = new ImageView(context);
-                    imageView.setLayoutParams(new GridView.LayoutParams(342,513));
+                    imageView.setLayoutParams(new GridView.LayoutParams(185,262));
                     imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                 }else{
                     imageView = (ImageView)convertView;
                 }
                 Movie m = getItem(position);
                 if (m.getPosterPath()!=null) {
-                    String url = "http://image.tmdb.org/t/p/w342/" + m.getPosterPath();
-                    Log.i(DEBUG_TAG, "Get image for position "+position+": "+url);
+                    String url = "http://image.tmdb.org/t/p/w185/" + m.getPosterPath();
+                    Log.i(LOG_TAG, "Get image for position "+position+": "+url);
                     Picasso.with(context).load(url).into(imageView);
                 }else{
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     imageView.setImageResource(R.drawable.noposter);
                 }
                 return imageView;

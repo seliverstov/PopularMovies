@@ -2,6 +2,7 @@ package com.seliverstov.popularmovies;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -9,6 +10,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.seliverstov.popularmovies.rest.TMDBClient;
@@ -24,6 +26,7 @@ public class MovieLoader {
     private LoadMoviesTask currentLoad;
     private Context context;
     private int page = 0;
+    private ProgressDialog loading;
 
     public MovieLoader(Context c){
         context = c;
@@ -35,6 +38,13 @@ public class MovieLoader {
 
         public LoadMoviesTask(ArrayAdapter<Movie> adapter){
             mAdapter = adapter;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            loading = new ProgressDialog(context);
+            loading.setMessage(context.getString(R.string.loading));
+            loading.show();
         }
 
         @Override
@@ -52,6 +62,9 @@ public class MovieLoader {
 
         @Override
         protected void onPostExecute (List < Movie > movies) {
+            if (loading!=null && loading.isShowing()) {
+                loading.dismiss();
+            }
             if (exeption!=null){
                 Toast.makeText(context, R.string.cant_load_movies, Toast.LENGTH_SHORT).show();
                 return;

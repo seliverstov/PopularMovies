@@ -6,6 +6,9 @@
     <string name="pref_sort_by_key" translatable="false">sort_by</string>
     <string name="pref_sort_by_default" translatable="false">popularity.desc</string>
     <string name="cant_load_movies">Ooops :( Can\'t load movies. Check your network connection!</string>
+    <string name="details">Details</string>
+    <string name="loading">Loading</string>
+    <string name="loading_message">Please wait while loading...</string>
     <string-array name="pref_sort_by_entries">
         <item>Popularity</item>
         <item>Rating</item>
