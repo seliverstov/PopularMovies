@@ -1,11 +1,12 @@
 package com.seliverstov.popularmovies;
 
 
+import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +26,9 @@ import java.util.List;
  * Created by a.g.seliverstov on 12.10.2015.
  */
 public class MoviesGridFragment extends Fragment {
+    private final int VISIBLE_TRESHOLD = 2;
+    private final MovieLoader movieLoader = new MovieLoader();
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
@@ -39,8 +41,6 @@ public class MoviesGridFragment extends Fragment {
 
             }
         });
-
-
 
         final ArrayAdapter<Movie> adapter = new ArrayAdapter<Movie>(context,android.R.layout.simple_list_item_1){
             @Override
@@ -56,20 +56,18 @@ public class MoviesGridFragment extends Fragment {
                 }
 
                 Movie m = getItem(position);
-                String url = "http://image.tmdb.org/t/p/w342/" + m.getPosterPath();
-                Log.i(this.getClass().toString(), url);
-                Picasso.with(context).load(url).into(imageView);
-
+                if (m.getPosterPath()!=null) {
+                    String url = "http://image.tmdb.org/t/p/w342/" + m.getPosterPath();
+                    Log.i(this.getClass().toString(), url);
+                    Picasso.with(context).load(url).into(imageView);
+                }else{
+                    imageView.setImageResource(R.drawable.noposter);
+                }
                 return imageView;
             }
         };
 
-
-
         gv.setOnScrollListener(new AbsListView.OnScrollListener() {
-            private int page = 0;
-            private int visibleTreshold = 2;
-            private AsyncTask<Integer,Void,List<Movie>> loadTask;
 
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -78,19 +76,20 @@ public class MoviesGridFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (loadTask == null || loadTask.getStatus() == AsyncTask.Status.FINISHED){
-                    if (totalItemCount - visibleItemCount <= (firstVisibleItem + visibleTreshold)) {
-                        Log.i(this.getClass().getSimpleName(),"Load page "+page);
-                        page++;
-                        AsyncTask<Integer, Void, List<Movie>> aTask = new LoadMoviesTask(adapter);
-                        aTask.execute(page);
-                    }
+                if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_TRESHOLD)) {
+                    loadMoviesToAdapter(adapter);
                 }
-
             }
         });
 
         gv.setAdapter(adapter);
+        loadMoviesToAdapter(adapter);
         return view;
+    }
+
+    private void loadMoviesToAdapter(ArrayAdapter<Movie> adapter){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sortBy = sp.getString(getString(R.string.pref_sort_by_key),getString(R.string.pref_sort_by_default));
+        movieLoader.loadMoreMovies(adapter,sortBy);
     }
 }
