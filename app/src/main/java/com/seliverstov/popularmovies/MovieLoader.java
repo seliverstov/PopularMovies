@@ -23,6 +23,7 @@ import java.util.List;
  * Created by a.g.seliverstov on 13.10.2015.
  */
 public class MovieLoader {
+    public static final String LOG_TAG = MovieLoader.class.getSimpleName();
     private LoadMoviesTask currentLoad;
     private Context context;
     private int page = 0;
@@ -80,5 +81,16 @@ public class MovieLoader {
             currentLoad = new LoadMoviesTask(adapter);
             currentLoad.execute(params);
         }
+    }
+
+    public void reloadMoreMovies(ArrayAdapter<Movie> adapter, String... params){
+        if (currentLoad != null && currentLoad.getStatus()!= AsyncTask.Status.FINISHED){
+            Log.i(LOG_TAG,"Cancel movie loading task");
+            currentLoad.cancel(true);
+        }
+        page = 0;
+        currentLoad = null;
+        adapter.clear();
+        loadMoreMovies(adapter,params);
     }
 }
