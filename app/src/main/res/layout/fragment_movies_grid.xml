@@ -7,7 +7,7 @@
     android:verticalSpacing="10dp"
     android:horizontalSpacing="10dp"
     android:stretchMode="columnWidth"
-    android:columnWidth="185px"
+    android:columnWidth="@dimen/small_movie_poster_width"
     android:gravity="center">
 
 </GridView>

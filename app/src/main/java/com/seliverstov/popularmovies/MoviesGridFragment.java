@@ -4,6 +4,7 @@ package com.seliverstov.popularmovies;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -48,15 +49,22 @@ public class MoviesGridFragment extends Fragment {
                 ImageView imageView;
                 if (convertView==null) {
                     imageView = new ImageView(context);
-                    imageView.setLayoutParams(new GridView.LayoutParams(185,262));
+                    imageView.setLayoutParams(
+                            new GridView.LayoutParams(
+                                    (int)getResources().getDimension(R.dimen.small_movie_poster_width),
+                                    (int)getResources().getDimension(R.dimen.big_movie_poster_height)));
                     imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                 }else{
                     imageView = (ImageView)convertView;
                 }
                 Movie m = getItem(position);
                 if (m.getPosterPath()!=null) {
-                    String url = "http://image.tmdb.org/t/p/w185/" + m.getPosterPath();
-                    Log.i(LOG_TAG, "Get image for position "+position+": "+url);
+                    Uri url = Uri.parse(getString(R.string.movie_poster_base_url))
+                            .buildUpon()
+                            .appendPath(getString(R.string.small_movie_poster_size))
+                            .appendEncodedPath(m.getPosterPath())
+                            .build();
+                    Log.i(LOG_TAG, "Get image for position "+position+": "+url.toString());
                     Picasso.with(context).load(url).into(imageView);
                 }else{
                     imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
