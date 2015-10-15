@@ -3,5 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="small_movie_poster_width">185px</dimen>
-    <dimen name="big_movie_poster_height">262px</dimen>
+    <dimen name="small_movie_poster_height">262px</dimen>
+    <dimen name="big_movie_poster_width">342px</dimen>
+    <dimen name="big_movie_poster_height">513px</dimen>
 </resources>

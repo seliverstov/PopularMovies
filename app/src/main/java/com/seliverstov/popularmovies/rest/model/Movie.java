@@ -3,6 +3,7 @@ package com.seliverstov.popularmovies.rest.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * Created by a.g.seliverstov on 12.10.2015.
  */
-public class Movie {
+public class Movie implements Serializable{
 
     @SerializedName("adult")
     @Expose

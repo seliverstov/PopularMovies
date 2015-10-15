@@ -19,4 +19,5 @@
     </string-array>
     <string name="movie_poster_base_url">http://image.tmdb.org/t/p/</string>
     <string name="small_movie_poster_size" translatable="false">w185</string>
+    <string name="big_movie_poster_size">w342</string>
 </resources>

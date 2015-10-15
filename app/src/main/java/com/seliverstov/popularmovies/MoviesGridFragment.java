@@ -3,6 +3,7 @@ package com.seliverstov.popularmovies;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,7 +47,7 @@ public class MoviesGridFragment extends Fragment {
                 imageView.setLayoutParams(
                         new GridView.LayoutParams(
                                 (int)getResources().getDimension(R.dimen.small_movie_poster_width),
-                                (int)getResources().getDimension(R.dimen.big_movie_poster_height)));
+                                (int)getResources().getDimension(R.dimen.small_movie_poster_height)));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             }else{
                 imageView = (ImageView)convertView;
@@ -84,7 +85,10 @@ public class MoviesGridFragment extends Fragment {
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Intent intent = new Intent(getActivity(),MovieDetailsActivity.class);
+                Movie m = mAdapter.getItem(position);
+                intent.putExtra(MovieDetailsFragment.EXTRA_MOVIE_OBJECT,m);
+                startActivity(intent);
             }
         });
 
