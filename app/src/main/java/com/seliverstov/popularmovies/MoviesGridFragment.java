@@ -99,4 +99,7 @@ public class MoviesGridFragment extends Fragment {
         String sortBy = sp.getString(getString(R.string.pref_sort_by_key),getString(R.string.pref_sort_by_default));
         movieLoader.loadMoreMovies(adapter,sortBy);
     }
+
+
+
 }
