@@ -19,7 +19,7 @@ import retrofit.Retrofit;
  * Created by a.g.seliverstov on 12.10.2015.
  */
 public class TMDBClient {
-    public static final String DEBUG_TAG = TMDBClient.class.getSimpleName();
+    public static final String LOG_TAG = TMDBClient.class.getSimpleName();
     public static final String BASE_URL = "https://api.themoviedb.org/";
 
     private TMDBService service;
@@ -32,7 +32,6 @@ public class TMDBClient {
     public List<Movie> listMovies(String sort_by, int page) throws IOException {
         Call<Movies> call = this.service.getMovies(TMDBKey.API_KEY, sort_by, (page <= 0) ? 1 : page);
         Response<Movies> res = call.execute();
-        Log.i(DEBUG_TAG,res.raw().request().urlString());
         Movies movies = res.body();
         return movies.getResults();
     }

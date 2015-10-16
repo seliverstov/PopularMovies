@@ -21,16 +21,13 @@ import android.widget.ImageView;
 import com.seliverstov.popularmovies.rest.model.Movie;
 import com.squareup.picasso.Picasso;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
 
 /**
  * Created by a.g.seliverstov on 12.10.2015.
  */
 public class MoviesGridFragment extends Fragment {
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
-    private int VISIBLE_TRESHOLD = 2;
+    private int VISIBLE_THRESHOLD = 2;
     private ImageArrayAdapter mAdapter;
 
     public class ImageArrayAdapter extends ArrayAdapter<Movie>{
@@ -60,7 +57,6 @@ public class MoviesGridFragment extends Fragment {
                         .appendPath(getString(R.string.small_movie_poster_size))
                         .appendEncodedPath(m.getPosterPath())
                         .build();
-                Log.i(LOG_TAG, "Get image for position "+position+": "+url.toString());
                 Picasso.with(mContext).load(url).placeholder(R.drawable.loading_small).into(imageView);
             }else{
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -75,11 +71,9 @@ public class MoviesGridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
 
-
         View view = inflater.inflate(R.layout.fragment_movies_grid,container,false);
 
         mAdapter = new ImageArrayAdapter(context);
-
 
         final GridView gv = (GridView)view.findViewById(R.id.movies_grid);
 
@@ -102,7 +96,7 @@ public class MoviesGridFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_TRESHOLD)) {
+                if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                     if (mAdapter.getCount() > 0) loadMoviesToAdapter(mAdapter);
                 }
             }
@@ -134,12 +128,10 @@ public class MoviesGridFragment extends Fragment {
             movieLoader.reset();
         }
 
+        mAdapter.clear();
         if (movieLoader.getMovies().size()==0) {
-            Log.i(LOG_TAG,"MovieLoader is empty!");
-            mAdapter.clear();
             loadMoviesToAdapter(mAdapter);
         }else{
-            mAdapter.clear();
             mAdapter.addAll(movieLoader.getMovies());
         }
     }

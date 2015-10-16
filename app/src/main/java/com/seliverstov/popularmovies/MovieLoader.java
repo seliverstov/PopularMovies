@@ -1,16 +1,10 @@
 package com.seliverstov.popularmovies;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.seliverstov.popularmovies.rest.TMDBClient;
@@ -28,7 +22,7 @@ public class MovieLoader {
     private LoadMoviesTask currentLoad;
     private Context context;
     private int page = 0;
-    private int pageSize = 20;
+    public static final int PAGE_SIZE = 20;
     private ProgressDialog loading;
 
     public List<Movie> getMovies() {
@@ -38,7 +32,7 @@ public class MovieLoader {
     public void setMovies(List<Movie> movies) {
         if (movies!=null) {
             this.movies = movies;
-            this.page = movies.size() / pageSize;
+            this.page = movies.size() / PAGE_SIZE;
         }
     }
 
