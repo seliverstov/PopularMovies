@@ -21,6 +21,9 @@ import android.widget.ImageView;
 import com.seliverstov.popularmovies.rest.model.Movie;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 
 /**
  * Created by a.g.seliverstov on 12.10.2015.
@@ -28,8 +31,6 @@ import com.squareup.picasso.Picasso;
 public class MoviesGridFragment extends Fragment {
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
     private int VISIBLE_TRESHOLD = 2;
-    private MovieLoader movieLoader;
-    private String currentSortOrder;
     private ImageArrayAdapter mAdapter;
 
     public class ImageArrayAdapter extends ArrayAdapter<Movie>{
@@ -73,7 +74,7 @@ public class MoviesGridFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
-        movieLoader = new MovieLoader(context);
+
 
         View view = inflater.inflate(R.layout.fragment_movies_grid,container,false);
 
@@ -85,9 +86,9 @@ public class MoviesGridFragment extends Fragment {
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(),MovieDetailsActivity.class);
+                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
                 Movie m = mAdapter.getItem(position);
-                intent.putExtra(MovieDetailsFragment.EXTRA_MOVIE_OBJECT,m);
+                intent.putExtra(MovieDetailsFragment.EXTRA_MOVIE_OBJECT, m);
                 startActivity(intent);
             }
         });
@@ -102,31 +103,44 @@ public class MoviesGridFragment extends Fragment {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_TRESHOLD)) {
-                    loadMoviesToAdapter(mAdapter);
+                    if (mAdapter.getCount() > 0) loadMoviesToAdapter(mAdapter);
                 }
             }
         });
 
         gv.setAdapter(mAdapter);
 
-        loadMoviesToAdapter(mAdapter);
         return view;
     }
 
     private void loadMoviesToAdapter(ArrayAdapter<Movie> adapter){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        currentSortOrder = sp.getString(getString(R.string.pref_sort_by_key),getString(R.string.pref_sort_by_default));
-        movieLoader.loadMoreMovies(adapter,currentSortOrder);
+        String currentSortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
+        ((MainActivity)getActivity()).getMovieLoader().loadMoreMovies(adapter, currentSortOrder);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        MainActivity a = ((MainActivity)getActivity());
+        String currentSortOrder = a.getCurrentSortOrder();
+        MovieLoader movieLoader = a.getMovieLoader();
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-        if (!sortOrder.equals(currentSortOrder)){
-            currentSortOrder=sortOrder;
-            movieLoader.reloadMoreMovies(mAdapter, currentSortOrder);
+
+        if (!currentSortOrder.equals(sortOrder)){
+            a.setCurrentSortOrder(sortOrder);
+            movieLoader.reset();
+        }
+
+        if (movieLoader.getMovies().size()==0) {
+            Log.i(LOG_TAG,"MovieLoader is empty!");
+            mAdapter.clear();
+            loadMoviesToAdapter(mAdapter);
+        }else{
+            mAdapter.clear();
+            mAdapter.addAll(movieLoader.getMovies());
         }
     }
 }

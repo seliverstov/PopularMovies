@@ -17,6 +17,7 @@ import com.seliverstov.popularmovies.rest.TMDBClient;
 import com.seliverstov.popularmovies.rest.model.Movie;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,9 +28,24 @@ public class MovieLoader {
     private LoadMoviesTask currentLoad;
     private Context context;
     private int page = 0;
+    private int pageSize = 20;
     private ProgressDialog loading;
 
+    public List<Movie> getMovies() {
+        return movies;
+    }
+
+    public void setMovies(List<Movie> movies) {
+        if (movies!=null) {
+            this.movies = movies;
+            this.page = movies.size() / pageSize;
+        }
+    }
+
+    private List<Movie> movies;
+
     public MovieLoader(Context c){
+        movies = new ArrayList<>();
         context = c;
     }
 
@@ -54,6 +70,7 @@ public class MovieLoader {
             page++;
             try {
                 List<Movie> result = new TMDBClient().listMovies(sortBy, page);
+                movies.addAll(result);
                 return result;
             }catch(IOException ex){
                 exeption = ex;
@@ -83,14 +100,14 @@ public class MovieLoader {
         }
     }
 
-    public void reloadMoreMovies(ArrayAdapter<Movie> adapter, String... params){
+    public void reset(){
+        Log.i(LOG_TAG,"MovieLoader reset!");
         if (currentLoad != null && currentLoad.getStatus()!= AsyncTask.Status.FINISHED){
             Log.i(LOG_TAG,"Cancel movie loading task");
             currentLoad.cancel(true);
         }
         page = 0;
         currentLoad = null;
-        adapter.clear();
-        loadMoreMovies(adapter,params);
+        movies.clear();
     }
 }
