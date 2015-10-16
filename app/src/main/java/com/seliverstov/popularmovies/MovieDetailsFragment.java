@@ -47,7 +47,7 @@ public class MovieDetailsFragment extends Fragment {
                     .appendEncodedPath(m.getPosterPath())
                     .build();
             Log.i(LOG_TAG, "Get poster for movie " + m.getTitle() + ": " + url.toString());
-            Picasso.with(getActivity()).load(url).into(poster);
+            Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_big).into(poster);
         }else{
             poster.setScaleType(ImageView.ScaleType.CENTER_CROP);
             poster.setImageResource(R.drawable.noposter);

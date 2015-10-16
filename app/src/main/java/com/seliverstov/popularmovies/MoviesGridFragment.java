@@ -61,7 +61,7 @@ public class MoviesGridFragment extends Fragment {
                         .appendEncodedPath(m.getPosterPath())
                         .build();
                 Log.i(LOG_TAG, "Get image for position "+position+": "+url.toString());
-                Picasso.with(mContext).load(url).into(imageView);
+                Picasso.with(mContext).load(url).placeholder(R.drawable.loading_small).into(imageView);
             }else{
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setImageResource(R.drawable.noposter);
