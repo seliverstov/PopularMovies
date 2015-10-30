@@ -9,16 +9,16 @@ import java.util.List;
 /**
  * Created by Alexander on 30.10.2015.
  */
-public class Movies extends BaseResult {
+public class Videos extends BaseResult {
     @SerializedName("results")
     @Expose
-    private List<Movie> results = new ArrayList<>();
+    private List<Video> results = new ArrayList<>();
 
-    public List<Movie> getResults() {
+    public List<Video> getResults() {
         return results;
     }
 
-    public void setResults(List<Movie> results) {
+    public void setResults(List<Video> results) {
         this.results = results;
     }
 }

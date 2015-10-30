@@ -1,9 +1,12 @@
 package com.seliverstov.popularmovies.rest;
 
-import android.util.Log;
-
 import com.seliverstov.popularmovies.rest.model.Movie;
+import com.seliverstov.popularmovies.rest.model.BaseResult;
 import com.seliverstov.popularmovies.rest.model.Movies;
+import com.seliverstov.popularmovies.rest.model.Review;
+import com.seliverstov.popularmovies.rest.model.Reviews;
+import com.seliverstov.popularmovies.rest.model.Video;
+import com.seliverstov.popularmovies.rest.model.Videos;
 import com.seliverstov.popularmovies.rest.service.TMDBService;
 
 import java.io.IOException;
@@ -32,7 +35,21 @@ public class TMDBClient {
     public List<Movie> listMovies(String sort_by, int page) throws IOException {
         Call<Movies> call = this.service.getMovies(TMDBKey.API_KEY, sort_by, (page <= 0) ? 1 : page);
         Response<Movies> res = call.execute();
-        Movies movies = res.body();
-        return movies.getResults();
+        Movies result = res.body();
+        return result.getResults();
+    }
+
+    public List<Review> listReviews(String movieId)  throws IOException {
+        Call<Reviews> call = this.service.getReviews(movieId, TMDBKey.API_KEY);
+        Response<Reviews> res =  call.execute();
+        Reviews result = res.body();
+        return result.getResults();
+    }
+
+    public List<Video> listVideos(String movieId)  throws IOException {
+        Call<Videos> call = this.service.getVideos(movieId, TMDBKey.API_KEY);
+        Response<Videos> res =  call.execute();
+        Videos result = res.body();
+        return result.getResults();
     }
 }
