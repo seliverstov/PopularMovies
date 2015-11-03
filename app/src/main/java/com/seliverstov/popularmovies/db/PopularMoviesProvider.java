@@ -72,6 +72,7 @@ public class PopularMoviesProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
+        retCursor.setNotificationUri(getContext().getContentResolver(),uri);
         return retCursor;
     }
 
@@ -131,7 +132,6 @@ public class PopularMoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
 
-        db.close();
         getContext().getContentResolver().notifyChange(uri,null);
         return returnUri;
     }
@@ -158,7 +158,9 @@ public class PopularMoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
 
-        db.close();
+        if (deletedRows>0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
         return deletedRows;
     }
 
@@ -184,7 +186,9 @@ public class PopularMoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
 
-        db.close();;
+        if (updatedRows>0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
         return updatedRows;
     }
 

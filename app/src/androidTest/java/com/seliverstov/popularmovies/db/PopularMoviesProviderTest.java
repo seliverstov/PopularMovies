@@ -1,14 +1,13 @@
 package com.seliverstov.popularmovies.db;
 
 import android.content.ComponentName;
-import android.content.pm.PackageInfo;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
-
-import junit.framework.TestCase;
 
 import static com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 
@@ -68,18 +67,48 @@ public class PopularMoviesProviderTest extends AndroidTestCase {
         assertEquals(0, c.getCount());
         c.close();
 
-        Uri newItemUri = mContext.getContentResolver().insert(MovieEntry.CONTENT_URI,TestUtils.getSampleMovieData());
+        ContentValues values = TestUtils.getSampleMovieData();
+
+        TestUtils.TestContentObserver tco = TestUtils.TestContentObserver.newInstance();
+        getContext().getContentResolver().registerContentObserver(MovieEntry.CONTENT_URI, true, tco);
+
+        Uri newItemUri = mContext.getContentResolver().insert(MovieEntry.CONTENT_URI, values);
         assertNotNull(newItemUri);
+
+        tco.waitForNotificationOrFail();
+        getContext().getContentResolver().unregisterContentObserver(tco);
 
         c = mContext.getContentResolver().query(newItemUri,null,null,null,null);
         assertTrue(c.moveToFirst());
-        TestUtils.validateRecord(c, TestUtils.getSampleMovieData());
+        TestUtils.validateRecord(c, values);
 
-        int delCnt = mContext.getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
-        assertEquals(1,delCnt);
+        tco = TestUtils.TestContentObserver.newInstance();
+        c.registerContentObserver(tco);
 
+        long id = ContentUris.parseId(newItemUri);
+        values.put(MovieEntry._ID,id);
+        values.put(MovieEntry.COLUMN_TITLE, "UPDATED!");
+        int updCnt = mContext.getContentResolver().update(MovieEntry.CONTENT_URI,values,MovieEntry._ID+" = ?", new String[]{String.valueOf(id)});
+        assertEquals(1, updCnt);
+
+        tco.waitForNotificationOrFail();
+        c.unregisterContentObserver(tco);
         c.close();
 
+        c = mContext.getContentResolver().query(MovieEntry.CONTENT_URI,null, MovieEntry._ID+" = ?",new String[]{String.valueOf(id)},null);
+        tco = TestUtils.TestContentObserver.newInstance();
+        c.registerContentObserver(tco);
+
+        assertTrue(c.moveToFirst());
+        assertEquals(1, c.getCount());
+        TestUtils.validateRecord(c, values);
+
+        int delCnt = mContext.getContentResolver().delete(MovieEntry.CONTENT_URI,MovieEntry._ID+" = ?",new String[]{String.valueOf(id)});
+        assertEquals(1, delCnt);
+
+        tco.waitForNotificationOrFail();
+        c.unregisterContentObserver(tco);
+        c.close();
     }
 
     public void testReviewQuries(){
@@ -87,18 +116,48 @@ public class PopularMoviesProviderTest extends AndroidTestCase {
         assertEquals(0, c.getCount());
         c.close();
 
-        Uri newItemUri = mContext.getContentResolver().insert(ReviewEntry.CONTENT_URI, TestUtils.getSampleReviewData());
+        ContentValues values = TestUtils.getSampleReviewData();
+
+        TestUtils.TestContentObserver tco = TestUtils.TestContentObserver.newInstance();
+        getContext().getContentResolver().registerContentObserver(ReviewEntry.CONTENT_URI, true, tco);
+
+        Uri newItemUri = mContext.getContentResolver().insert(ReviewEntry.CONTENT_URI, values);
         assertNotNull(newItemUri);
+
+        tco.waitForNotificationOrFail();
+        getContext().getContentResolver().unregisterContentObserver(tco);
 
         c = mContext.getContentResolver().query(newItemUri,null,null,null,null);
         assertTrue(c.moveToFirst());
-        TestUtils.validateRecord(c,TestUtils.getSampleReviewData());
+        TestUtils.validateRecord(c, values);
 
-        int delCnt = mContext.getContentResolver().delete(ReviewEntry.CONTENT_URI,null,null);
-        assertEquals(1,delCnt);
+        tco = TestUtils.TestContentObserver.newInstance();
+        c.registerContentObserver(tco);
 
+        long id = ContentUris.parseId(newItemUri);
+        values.put(ReviewEntry._ID,id);
+        values.put(ReviewEntry.COLUMN_CONTENT, "UPDATED!");
+        int updCnt = mContext.getContentResolver().update(ReviewEntry.CONTENT_URI,values,ReviewEntry._ID+" = ?", new String[]{String.valueOf(id)});
+        assertEquals(1, updCnt);
+
+        tco.waitForNotificationOrFail();
+        c.unregisterContentObserver(tco);
         c.close();
 
+        c = mContext.getContentResolver().query(ReviewEntry.CONTENT_URI,null, ReviewEntry._ID+" = ?",new String[]{String.valueOf(id)},null);
+        tco = TestUtils.TestContentObserver.newInstance();
+        c.registerContentObserver(tco);
+
+        assertTrue(c.moveToFirst());
+        assertEquals(1, c.getCount());
+        TestUtils.validateRecord(c, values);
+
+        int delCnt = mContext.getContentResolver().delete(ReviewEntry.CONTENT_URI,ReviewEntry._ID+" = ?",new String[]{String.valueOf(id)});
+        assertEquals(1, delCnt);
+
+        tco.waitForNotificationOrFail();
+        c.unregisterContentObserver(tco);
+        c.close();
     }
 
     public void testVideoQuries(){
@@ -106,17 +165,47 @@ public class PopularMoviesProviderTest extends AndroidTestCase {
         assertEquals(0, c.getCount());
         c.close();
 
-        Uri newItemUri = mContext.getContentResolver().insert(VideoEntry.CONTENT_URI, TestUtils.getSampleVideoData());
+        ContentValues values = TestUtils.getSampleVideoData();
+
+        TestUtils.TestContentObserver tco = TestUtils.TestContentObserver.newInstance();
+        getContext().getContentResolver().registerContentObserver(VideoEntry.CONTENT_URI, true, tco);
+
+        Uri newItemUri = mContext.getContentResolver().insert(VideoEntry.CONTENT_URI, values);
         assertNotNull(newItemUri);
+
+        tco.waitForNotificationOrFail();
+        getContext().getContentResolver().unregisterContentObserver(tco);
 
         c = mContext.getContentResolver().query(newItemUri,null,null,null,null);
         assertTrue(c.moveToFirst());
-        TestUtils.validateRecord(c,TestUtils.getSampleVideoData());
+        TestUtils.validateRecord(c, values);
 
-        int delCnt = mContext.getContentResolver().delete(VideoEntry.CONTENT_URI,null,null);
-        assertEquals(1,delCnt);
+        tco = TestUtils.TestContentObserver.newInstance();
+        c.registerContentObserver(tco);
 
+        long id = ContentUris.parseId(newItemUri);
+        values.put(VideoEntry._ID,id);
+        values.put(VideoEntry.COLUMN_NAME, "UPDATED!");
+        int updCnt = mContext.getContentResolver().update(VideoEntry.CONTENT_URI,values,VideoEntry._ID+" = ?", new String[]{String.valueOf(id)});
+        assertEquals(1, updCnt);
+
+        tco.waitForNotificationOrFail();
+        c.unregisterContentObserver(tco);
         c.close();
 
+        c = mContext.getContentResolver().query(VideoEntry.CONTENT_URI,null, VideoEntry._ID+" = ?",new String[]{String.valueOf(id)},null);
+        tco = TestUtils.TestContentObserver.newInstance();
+        c.registerContentObserver(tco);
+
+        assertTrue(c.moveToFirst());
+        assertEquals(1, c.getCount());
+        TestUtils.validateRecord(c, values);
+
+        int delCnt = mContext.getContentResolver().delete(VideoEntry.CONTENT_URI,VideoEntry._ID+" = ?",new String[]{String.valueOf(id)});
+        assertEquals(1, delCnt);
+
+        tco.waitForNotificationOrFail();
+        c.unregisterContentObserver(tco);
+        c.close();
     }
 }

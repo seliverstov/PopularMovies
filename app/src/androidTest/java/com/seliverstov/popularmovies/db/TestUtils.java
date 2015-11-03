@@ -1,7 +1,11 @@
 package com.seliverstov.popularmovies.db;
 
 import android.content.ContentValues;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.HandlerThread;
 
 import java.util.Map;
 import java.util.Set;
@@ -72,6 +76,42 @@ public class TestUtils {
                     String currentValue = c.getString(colIndex);
                     assertEquals(expectedValue, currentValue);
             }
+        }
+    }
+
+    static class TestContentObserver extends ContentObserver{
+        final HandlerThread mHandlerThread;
+        boolean mContentChanged;
+
+        public static TestContentObserver newInstance(){
+            HandlerThread ht = new HandlerThread("TestContentObserverThread");
+            ht.start();
+            return new TestContentObserver(ht);
+        }
+
+        private TestContentObserver(HandlerThread ht) {
+            super(new Handler(ht.getLooper()));
+            mHandlerThread = ht;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange,null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            mContentChanged = true;
+        }
+
+        public void waitForNotificationOrFail() {
+            new PollingCheck(5000) {
+                @Override
+                protected boolean check() {
+                    return mContentChanged;
+                }
+            }.run();
+            mHandlerThread.quit();
         }
     }
 
