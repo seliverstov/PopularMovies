@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by a.g.seliverstov on 03.11.2015.
@@ -58,6 +59,7 @@ public class TestUtils {
         Set<Map.Entry<String, Object>> vs = row.valueSet();
         for(Map.Entry<String, Object> e:vs){
             int colIndex = c.getColumnIndex(e.getKey());
+            assertTrue(colIndex >= 0);
             int colType = c.getType(colIndex);
             switch (colType){
                 case Cursor.FIELD_TYPE_FLOAT:
