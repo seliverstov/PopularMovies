@@ -84,7 +84,7 @@ public class PopularMoviesDbHelperTest extends AndroidTestCase  {
 
         assertTrue(c.moveToFirst());
 
-        validateRecord(c, row);
+        TestUtils.validateRecord(c, row);
 
         assertFalse(c.moveToNext());
         c.close();
@@ -123,7 +123,7 @@ public class PopularMoviesDbHelperTest extends AndroidTestCase  {
 
         assertTrue(c.moveToFirst());
 
-        validateRecord(c, row);
+        TestUtils.validateRecord(c, row);
 
         assertFalse(c.moveToNext());
         c.close();
@@ -158,29 +158,11 @@ public class PopularMoviesDbHelperTest extends AndroidTestCase  {
 
         assertTrue(c.moveToFirst());
 
-        validateRecord(c, row);
+        TestUtils.validateRecord(c, row);
 
         assertFalse(c.moveToNext());
         c.close();
         db.close();
     }
 
-    private void validateRecord(Cursor c, ContentValues row) {
-        Set<Map.Entry<String, Object>> vs = row.valueSet();
-        for(Map.Entry<String, Object> e:vs){
-            int colIndex = c.getColumnIndex(e.getKey());
-            int colType = c.getType(colIndex);
-            switch (colType){
-                case Cursor.FIELD_TYPE_FLOAT:
-                    Double expDouble = (Double)e.getValue();
-                    Double curDouble = c.getDouble(colIndex);
-                    assertEquals(expDouble,curDouble);
-                    break;
-                default:
-                    String expectedValue = String.valueOf(e.getValue());
-                    String currentValue = c.getString(colIndex);
-                    assertEquals(expectedValue, currentValue);
-            }
-        }
-    }
 }

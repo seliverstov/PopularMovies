@@ -1,6 +1,12 @@
 package com.seliverstov.popularmovies.db;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+
+import java.util.Map;
+import java.util.Set;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * Created by a.g.seliverstov on 03.11.2015.
@@ -48,5 +54,23 @@ public class TestUtils {
         return row;
     }
 
+    public static void validateRecord(Cursor c, ContentValues row) {
+        Set<Map.Entry<String, Object>> vs = row.valueSet();
+        for(Map.Entry<String, Object> e:vs){
+            int colIndex = c.getColumnIndex(e.getKey());
+            int colType = c.getType(colIndex);
+            switch (colType){
+                case Cursor.FIELD_TYPE_FLOAT:
+                    Double expDouble = (Double)e.getValue();
+                    Double curDouble = c.getDouble(colIndex);
+                    assertEquals(expDouble,curDouble);
+                    break;
+                default:
+                    String expectedValue = String.valueOf(e.getValue());
+                    String currentValue = c.getString(colIndex);
+                    assertEquals(expectedValue, currentValue);
+            }
+        }
+    }
 
 }
