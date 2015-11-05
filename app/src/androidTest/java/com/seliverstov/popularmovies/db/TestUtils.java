@@ -17,9 +17,14 @@ import static junit.framework.Assert.assertTrue;
  * Created by a.g.seliverstov on 03.11.2015.
  */
 public class TestUtils {
+
     public static ContentValues getSampleMovieData(){
+        return getSampleMovieData(null);
+    }
+
+    public static ContentValues getSampleMovieData(Integer id){
         ContentValues row = new ContentValues();
-        row.put(PopularMoviesContact.MovieEntry._ID, 135397);
+        row.put(PopularMoviesContact.MovieEntry._ID, id==null?135397:id);
         row.put(PopularMoviesContact.MovieEntry.COLUMN_ADULT,0);
         row.put(PopularMoviesContact.MovieEntry.COLUMN_BACKDROP_PATH,"/dkMD5qlogeRMiEixC4YNPUvax2T.jpg");
         row.put(PopularMoviesContact.MovieEntry.COLUMN_GENRE_IDS,"[28,12,878,53]");
@@ -37,8 +42,12 @@ public class TestUtils {
     }
 
     public static ContentValues getSampleReviewData(){
+        return getSampleReviewData(null);
+    }
+
+    public static ContentValues getSampleReviewData(Integer tmdb_id){
         ContentValues row = new ContentValues();
-        row.put(PopularMoviesContact.ReviewEntry.COLUMN_TMDB_ID,"55910381c3a36807f900065d");
+        row.put(PopularMoviesContact.ReviewEntry.COLUMN_TMDB_ID,tmdb_id==null?"55910381c3a36807f900065d":String.valueOf(tmdb_id));
         row.put(PopularMoviesContact.ReviewEntry.COLUMN_AUTHOR,"jonlikesmoviesthatdontsuck");
         row.put(PopularMoviesContact.ReviewEntry.COLUMN_CONTENT,"I was a huge fan of the original 3 movies, they were out when I was younger, and I grew up loving dinosaurs because of them. This movie was awesome, and I think it can stand as a testimonial piece towards the capabilities that Christopher Pratt has. He nailed it. The graphics were awesome, the supporting cast did great and the t rex saved the child in me. 10\\5 stars, four thumbs up, and I hope that star wars episode VII doesn't disappoint,");
         row.put(PopularMoviesContact.ReviewEntry.COLUMN_URL,"http://j.mp/1GHgSxi");
@@ -47,8 +56,12 @@ public class TestUtils {
     }
 
     public static ContentValues getSampleVideoData(){
+        return getSampleVideoData(null);
+    }
+
+    public static ContentValues getSampleVideoData(Integer tmdb_id){
         ContentValues row = new ContentValues();
-        row.put(PopularMoviesContact.VideoEntry.COLUMN_TMDB_ID,"5576eac192514111e4001b03");
+        row.put(PopularMoviesContact.VideoEntry.COLUMN_TMDB_ID,tmdb_id==null?"5576eac192514111e4001b03":String.valueOf(tmdb_id));
         row.put(PopularMoviesContact.VideoEntry.COLUMN_ISO_639_1,"en");
         row.put(PopularMoviesContact.VideoEntry.COLUMN_KEY,"lP-sUUUfamw");
         row.put(PopularMoviesContact.VideoEntry.COLUMN_NAME,"Official Trailer 3");
@@ -79,6 +92,30 @@ public class TestUtils {
         }
     }
 
+    public static ContentValues[] getSampleMovies(int count){
+        ContentValues[] values = new ContentValues[count];
+        for(int i=0;i<count;i++){
+            values[i]=getSampleMovieData(i);
+        }
+        return values;
+    }
+
+    public static ContentValues[] getSampleReviews(int count) {
+        ContentValues[] values = new ContentValues[count];
+        for(int i=0;i<count;i++){
+            values[i]=getSampleReviewData(i);
+        }
+        return values;
+    }
+
+    public static ContentValues[] getSampleVideos(int count) {
+        ContentValues[] values = new ContentValues[count];
+        for(int i=0;i<count;i++){
+            values[i]=getSampleVideoData(i);
+        }
+        return values;
+    }
+
     static class TestContentObserver extends ContentObserver{
         final HandlerThread mHandlerThread;
         boolean mContentChanged;
@@ -94,10 +131,10 @@ public class TestUtils {
             mHandlerThread = ht;
         }
 
-        @Override
+        /*@Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange,null);
-        }
+        }*/
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {

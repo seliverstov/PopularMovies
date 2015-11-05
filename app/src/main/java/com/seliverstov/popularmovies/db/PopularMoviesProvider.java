@@ -106,7 +106,7 @@ public class PopularMoviesProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)){
             case MOVIE: {
                 long id = db.insert(MovieEntry.TABLE_NAME, null, values);
-                if (id > 0)
+                if (id != -1)
                     returnUri = ContentUris.withAppendedId(MovieEntry.CONTENT_URI, id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
@@ -114,7 +114,7 @@ public class PopularMoviesProvider extends ContentProvider {
             }
             case REVIEW: {
                 long id = db.insert(ReviewEntry.TABLE_NAME, null, values);
-                if (id > 0)
+                if (id != -1)
                     returnUri = ContentUris.withAppendedId(ReviewEntry.CONTENT_URI, id);
                 else
                     throw new UnsupportedOperationException("Failed to insert row into " + uri);
@@ -122,7 +122,7 @@ public class PopularMoviesProvider extends ContentProvider {
             }
             case VIDEO: {
                 long id = db.insert(VideoEntry.TABLE_NAME, null, values);
-                if (id > 0)
+                if (id != -1)
                     returnUri = ContentUris.withAppendedId(VideoEntry.CONTENT_URI, id);
                 else
                     throw new UnsupportedOperationException("Failed to insert row into " + uri);
@@ -190,6 +190,40 @@ public class PopularMoviesProvider extends ContentProvider {
             getContext().getContentResolver().notifyChange(uri,null);
         }
         return updatedRows;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        String table;
+        switch (sUriMatcher.match(uri)){
+            case MOVIE:
+                table = MovieEntry.TABLE_NAME;
+                break;
+            case REVIEW:
+                table = ReviewEntry.TABLE_NAME;
+                break;
+            case VIDEO:
+                table = VideoEntry.TABLE_NAME;
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported uri:" + uri);
+        }
+        int insertedRows = 0;
+        db.beginTransaction();
+        try {
+            for (ContentValues v : values) {
+                long id = db.insert(table, null, v);
+                if (id != -1) insertedRows++;
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        if (insertedRows > 0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+        return insertedRows;
     }
 
     @Override
