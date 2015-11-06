@@ -17,9 +17,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
-    public static final String SAVED_MOVIES = MainActivity.class.getSimpleName()+".SAVED_MOVIES";
-
-    private MovieLoader movieLoader;
 
     public void setCurrentSortOrder(String currentSortOrder) {
         this.currentSortOrder = currentSortOrder;
@@ -27,10 +24,6 @@ public class MainActivity extends AppCompatActivity {
 
     private String currentSortOrder;
 
-
-    public MovieLoader getMovieLoader() {
-        return movieLoader;
-    }
 
     public String getCurrentSortOrder() {
         return currentSortOrder;
@@ -41,19 +34,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (movieLoader==null){
-            movieLoader = new MovieLoader(this);
-        }
-
         if (savedInstanceState!=null){
             Log.i(LOG_TAG,"Restore saved state:");
             if (savedInstanceState!=null){
                 String sortOrder = savedInstanceState.getString(SAVED_SORT_ORDER);
-                ArrayList<Movie> movies = (ArrayList<Movie>)savedInstanceState.getSerializable(SAVED_MOVIES);
                 if (sortOrder!=null) this.currentSortOrder=sortOrder;
-                if (movies!=null) this.movieLoader.setMovies(movies);
                 Log.i(LOG_TAG,"\tsortOrder: "+sortOrder);
-                Log.i(LOG_TAG,"\tmovies: "+movies);
             }
         }
 
@@ -63,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         if (currentSortOrder==null){
             currentSortOrder = sortOrder;
         }else if (!currentSortOrder.equals(sortOrder)){
-            movieLoader.reset();
+            //TODO: Requery data from db with new sort order
         }
     }
 
@@ -90,8 +76,6 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         Log.i(LOG_TAG, "Save state:");
         outState.putString(SAVED_SORT_ORDER, currentSortOrder);
-        outState.putSerializable(SAVED_MOVIES, (ArrayList<Movie>) movieLoader.getMovies());
         Log.i(LOG_TAG, "\tsortOrder: " + currentSortOrder);
-        Log.i(LOG_TAG, "\tmovies: " + movieLoader.getMovies());
     }
 }

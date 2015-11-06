@@ -2,88 +2,82 @@ package com.seliverstov.popularmovies;
 
 
 import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
+import android.content.Loader;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
 
-import com.seliverstov.popularmovies.rest.model.Movie;
-import com.squareup.picasso.Picasso;
+import com.seliverstov.popularmovies.db.PopularMoviesContact;
+import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
 
 
 /**
  * Created by a.g.seliverstov on 12.10.2015.
  */
-public class MoviesGridFragment extends Fragment {
+public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
     private int VISIBLE_THRESHOLD = 2;
-    private ImageArrayAdapter mAdapter;
 
-    public class ImageArrayAdapter extends ArrayAdapter<Movie>{
-        private Context mContext;
-        public ImageArrayAdapter(Context context) {
-            super(context, android.R.layout.simple_list_item_1);
-            mContext = context;
-        }
+    private int TMDB_MOVIES_LOADER_ID = 0;
+    private int CURSOR_MOVIES_LOADER_ID = 1;
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ImageView imageView;
-            if (convertView==null) {
-                imageView = new ImageView(mContext);
-                imageView.setLayoutParams(
-                        new GridView.LayoutParams(
-                                (int)getResources().getDimension(R.dimen.small_movie_poster_width),
-                                (int)getResources().getDimension(R.dimen.small_movie_poster_height)));
-                imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            }else{
-                imageView = (ImageView)convertView;
-            }
-            Movie m = getItem(position);
-            if (m.getPosterPath()!=null) {
-                Uri url = Uri.parse(getString(R.string.movie_poster_base_url))
-                        .buildUpon()
-                        .appendPath(getString(R.string.small_movie_poster_size))
-                        .appendEncodedPath(m.getPosterPath())
-                        .build();
-                Picasso.with(mContext).load(url).placeholder(R.drawable.loading_small).into(imageView);
-            }else{
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setImageResource(R.drawable.noposter);
-            }
-            return imageView;
-        }
+
+    private MoviesAdapter mMoviesAdapter;
+
+    private static String[] COLUMNS = {
+            PopularMoviesContact.MovieEntry._ID,
+            PopularMoviesContact.MovieEntry.COLUMN_POSTER_PATH
     };
 
+    public static int IDX_ID = 0;
+    public static int IDX_POSTER_PATH = 1;
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(), PopularMoviesContact.MovieEntry.CONTENT_URI,COLUMNS,null,null, PopularMoviesContact.MovieEntry.COLUMN_POPULARITY+" DESC");
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mMoviesAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMoviesAdapter.swapCursor(null);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
 
-        View view = inflater.inflate(R.layout.fragment_movies_grid,container,false);
+        View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
 
-        mAdapter = new ImageArrayAdapter(context);
+        mMoviesAdapter = new MoviesAdapter(context,null,0);
 
         final GridView gv = (GridView)view.findViewById(R.id.movies_grid);
 
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-                Movie m = mAdapter.getItem(position);
-                intent.putExtra(MovieDetailsFragment.EXTRA_MOVIE_OBJECT, m);
-                startActivity(intent);
+                Cursor c = (Cursor) mMoviesAdapter.getItem(position);
+                if (c != null) {
+                    Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+                    intent.setData(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
+                    startActivity(intent);
+                }
             }
         });
 
@@ -96,29 +90,50 @@ public class MoviesGridFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
-                    if (mAdapter.getCount() > 0) loadMoviesToAdapter(mAdapter);
+                if (totalItemCount > 0) {
+                    if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
+                        Log.i(LOG_TAG, "Load additional movies on scroll");
+                        getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
+                        Log.i(LOG_TAG, "Database size:"+DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
+                    }
                 }
             }
         });
 
-        gv.setAdapter(mAdapter);
-
+        gv.setAdapter(mMoviesAdapter);
         return view;
     }
 
-    private void loadMoviesToAdapter(ArrayAdapter<Movie> adapter){
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String currentSortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-        ((MainActivity)getActivity()).getMovieLoader().loadMoreMovies(adapter, currentSortOrder);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.i(LOG_TAG, "Init CURSOR_MOVIES_LOADER_ID");
+        getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, this);
+        Log.i(LOG_TAG, "Init TMDB_MOVIES_LOADER_ID");
+        Loader l = getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new MoviesLoader(getActivity());
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {}
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {}
+        });
+        long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
+        if (count == 0){
+            l.forceLoad();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        MainActivity a = ((MainActivity)getActivity());
+        /*MainActivity a = ((MainActivity)getActivity());
         String currentSortOrder = a.getCurrentSortOrder();
-        MovieLoader movieLoader = a.getMovieLoader();
+        OldMovieLoader movieLoader = a.getMovieLoader();
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
@@ -133,6 +148,6 @@ public class MoviesGridFragment extends Fragment {
             loadMoviesToAdapter(mAdapter);
         }else{
             mAdapter.addAll(movieLoader.getMovies());
-        }
+        }*/
     }
 }

@@ -3,6 +3,8 @@ package com.seliverstov.popularmovies.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
 import com.seliverstov.popularmovies.db.PopularMoviesContact.MovieEntry;
 import com.seliverstov.popularmovies.db.PopularMoviesContact.ReviewEntry;
 import com.seliverstov.popularmovies.db.PopularMoviesContact.VideoEntry;
@@ -11,8 +13,10 @@ import com.seliverstov.popularmovies.db.PopularMoviesContact.VideoEntry;
  * Created by a.g.seliverstov on 02.11.2015.
  */
 public class PopularMoviesDbHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final String LOG_TAG = PopularMoviesDbHelper.class.getSimpleName();
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "popular_movies.db";
+
 
     public PopularMoviesDbHelper(Context context){
         super(context,DATABASE_NAME,null,DATABASE_VERSION);
@@ -63,10 +67,15 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_MOVIES_TABLE);
         db.execSQL(SQL_CREATE_REVIEWS_TABLE);
         db.execSQL(SQL_CREATE_VIDEOS_TABLE);
+        Log.i(LOG_TAG, "Database created!");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        
+        db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ReviewEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + VideoEntry.TABLE_NAME);
+        onCreate(db);
+        Log.i(LOG_TAG, "Database upgraded!");
     }
 }
