@@ -55,8 +55,11 @@ public class PopularMoviesProvider extends ContentProvider {
         Cursor retCursor;
         switch (sUriMatcher.match(uri)){
             case MOVIE:
-            case MOVIE_WITH_ID:{
                 retCursor = db.query(MovieEntry.TABLE_NAME,projection,selection,selectionArgs,null,null,sortOrder);
+                break;
+            case MOVIE_WITH_ID:{
+                String id = String.valueOf(ContentUris.parseId(uri));
+                retCursor = db.query(MovieEntry.TABLE_NAME,projection,MovieEntry._ID+" = ?",new String[]{id},null,null,sortOrder);
                 break;
             }
             case REVIEW:
