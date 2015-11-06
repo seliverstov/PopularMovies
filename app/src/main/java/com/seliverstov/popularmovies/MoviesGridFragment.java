@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
  */
 public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
+
     private int VISIBLE_THRESHOLD = 2;
 
     private int TMDB_MOVIES_LOADER_ID = 0;
@@ -46,7 +49,9 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), PopularMoviesContact.MovieEntry.CONTENT_URI,COLUMNS,null,null, PopularMoviesContact.MovieEntry.COLUMN_POPULARITY+" DESC");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
+        return new CursorLoader(getActivity(), PopularMoviesContact.MovieEntry.CONTENT_URI, COLUMNS,null,null, sortOrder);
     }
 
     @Override
@@ -65,9 +70,9 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
 
-        mMoviesAdapter = new MoviesAdapter(context,null,0);
+        mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
-        final GridView gv = (GridView)view.findViewById(R.id.movies_grid);
+        final GridView gv = (GridView) view.findViewById(R.id.movies_grid);
 
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -94,7 +99,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                     if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                         Log.i(LOG_TAG, "Load additional movies on scroll");
                         getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
-                        Log.i(LOG_TAG, "Database size:"+DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
+                        Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
                     }
                 }
             }
@@ -107,9 +112,9 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.i(LOG_TAG, "Init CURSOR_MOVIES_LOADER_ID");
+
         getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, this);
-        Log.i(LOG_TAG, "Init TMDB_MOVIES_LOADER_ID");
+
         Loader l = getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -117,37 +122,20 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
             }
 
             @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {}
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            }
 
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {}
         });
+
         long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
         if (count == 0){
             l.forceLoad();
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        /*MainActivity a = ((MainActivity)getActivity());
-        String currentSortOrder = a.getCurrentSortOrder();
-        OldMovieLoader movieLoader = a.getMovieLoader();
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-
-        if (!currentSortOrder.equals(sortOrder)){
-            a.setCurrentSortOrder(sortOrder);
-            movieLoader.reset();
-        }
-
-        mAdapter.clear();
-        if (movieLoader.getMovies().size()==0) {
-            loadMoviesToAdapter(mAdapter);
-        }else{
-            mAdapter.addAll(movieLoader.getMovies());
-        }*/
+    void onSortOrderChanged(){
+        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID,null,this);
     }
 }

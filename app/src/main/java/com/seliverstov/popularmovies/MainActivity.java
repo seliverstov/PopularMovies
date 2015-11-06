@@ -9,47 +9,21 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.seliverstov.popularmovies.rest.model.Movie;
-
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity {
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
 
-    public void setCurrentSortOrder(String currentSortOrder) {
-        this.currentSortOrder = currentSortOrder;
-    }
-
-    private String currentSortOrder;
-
-
-    public String getCurrentSortOrder() {
-        return currentSortOrder;
-    }
-
+    private String mSortOrder;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState!=null){
-            Log.i(LOG_TAG,"Restore saved state:");
-            if (savedInstanceState!=null){
                 String sortOrder = savedInstanceState.getString(SAVED_SORT_ORDER);
-                if (sortOrder!=null) this.currentSortOrder=sortOrder;
-                Log.i(LOG_TAG,"\tsortOrder: "+sortOrder);
-            }
-        }
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-
-        if (currentSortOrder==null){
-            currentSortOrder = sortOrder;
-        }else if (!currentSortOrder.equals(sortOrder)){
-            //TODO: Requery data from db with new sort order
+                if (sortOrder!=null) mSortOrder = sortOrder;
+                Log.i(LOG_TAG,"Restore saved state: sortOrder = "+sortOrder);
         }
     }
 
@@ -74,8 +48,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.i(LOG_TAG, "Save state:");
-        outState.putString(SAVED_SORT_ORDER, currentSortOrder);
-        Log.i(LOG_TAG, "\tsortOrder: " + currentSortOrder);
+        Log.i(LOG_TAG, "Save state: sortOrder = "+mSortOrder);
+        outState.putString(SAVED_SORT_ORDER, mSortOrder);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
+
+        if (mSortOrder ==null) mSortOrder = sortOrder;
+
+        if (!mSortOrder.equals(sortOrder)){
+            mSortOrder = sortOrder;
+            MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
+            if (fragment!=null) fragment.onSortOrderChanged();
+        }
     }
 }
