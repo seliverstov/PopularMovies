@@ -21,7 +21,8 @@ import java.util.List;
  */
 public class MoviesLoader extends AsyncTaskLoader<Cursor> {
     private static String LOG_TAG = MoviesLoader.class.getSimpleName();
-    Context mContext;
+
+    private Context mContext;
 
     public MoviesLoader(Context context) {
         super(context);
@@ -31,13 +32,11 @@ public class MoviesLoader extends AsyncTaskLoader<Cursor> {
     @Override
     public Cursor loadInBackground() {
         Log.i(LOG_TAG,"Start load in background");
-        String SORT = "popularity.desc";
-        int PAGE_SIZE = 20;
         SQLiteDatabase db = (new PopularMoviesDbHelper(mContext)).getReadableDatabase();
         int totalMovies = (int)DatabaseUtils.queryNumEntries(db, PopularMoviesContact.MovieEntry.TABLE_NAME);
-        int page = totalMovies / PAGE_SIZE + 1;
+        int page = totalMovies / TMDBClient.DEFAULT_PAGE_SIZE + 1;
         try {
-            List<Movie> movies = new TMDBClient().listMovies(SORT, page);
+            List<Movie> movies = new TMDBClient().listMovies(TMDBClient.DEFAULT_SORT_ORDER, page);
             ContentValues[] cvs = new ContentValues[movies.size()];
             for(int i=0;i<movies.size();i++){
                 ContentValues cv = new ContentValues();
