@@ -1,6 +1,7 @@
 package com.seliverstov.popularmovies;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import static com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 public class MovieDetailsFragment extends Fragment {
     public static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
 
+    public static final String MOVIE_DETAILS_URI = "MOVIE_DETAILS_URI";
+
     private static String[] COLUMNS = {
             MovieEntry.COLUMN_ORIGINAL_TITLE,
             MovieEntry.COLUMN_RELEASE_DATE,
@@ -37,11 +40,19 @@ public class MovieDetailsFragment extends Fragment {
     private static int IDX_VOTE_AVERAGE = 2;
     private static int IDX_OVERVIEW = 3;
     private static int IDX_POSTER_PATH = 4;
+    private Uri mUri;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_movie_details, container, false);
-        Uri uri = getActivity().getIntent().getData();
-        Cursor c = getActivity().getContentResolver().query(uri,COLUMNS,null,null,null);
+        Bundle arguments  = getArguments();
+        if (arguments!=null){
+            mUri = arguments.getParcelable(MOVIE_DETAILS_URI);
+        }
+
+        if (mUri==null) return null;
+
+        View view = inflater.inflate(R.layout.fragment_details, container, false);
+        Cursor c = getActivity().getContentResolver().query(mUri, COLUMNS, null, null, null);
+
         if (c.moveToFirst()){
             TextView title = (TextView)view.findViewById(R.id.movie_title);
             TextView year = (TextView)view.findViewById(R.id.movie_year);
@@ -77,5 +88,9 @@ public class MovieDetailsFragment extends Fragment {
         }
 
         return view;
+    }
+
+    public void onSortOrderChange(){
+        
     }
 }

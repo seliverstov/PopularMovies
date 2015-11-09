@@ -11,6 +11,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie_details);
+        setContentView(R.layout.activity_details);
+        if (savedInstanceState==null){
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI, getIntent().getData());
+            MovieDetailsFragment mdf = new MovieDetailsFragment();
+            mdf.setArguments(arguments);
+            getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf).commit();
+        }
     }
 }

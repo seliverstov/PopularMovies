@@ -2,6 +2,7 @@ package com.seliverstov.popularmovies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -9,16 +10,28 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MoviesGridFragment.ItemSelectedCallback{
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
 
+    private static final String MOVIE_DETAILS_FRAGMENT_TAG = "MOVIE_DETAILS_FRAGMENT_TAG";
+
     private String mSortOrder;
+    private boolean mTwoPane;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (findViewById(R.id.details_fragment_container)!=null){
+            mTwoPane = true;
+            if (savedInstanceState==null){
+                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new MovieDetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
+            }
+        }else{
+            mTwoPane = false;
+        }
 
         if (savedInstanceState!=null){
                 String sortOrder = savedInstanceState.getString(SAVED_SORT_ORDER);
@@ -64,6 +77,24 @@ public class MainActivity extends AppCompatActivity {
             mSortOrder = sortOrder;
             MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
             if (fragment!=null) fragment.onSortOrderChanged();
+
+            /*MovieDetailsFragment mdf = (MovieDetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
+            if (mdf!=null) mdf.onSortOrderChanged();*/
+        }
+    }
+
+    @Override
+    public void onItemSelected(Uri uri) {
+        if (mTwoPane){
+            Bundle argumants = new Bundle();
+            argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI,uri);
+            MovieDetailsFragment mdf = new MovieDetailsFragment();
+            mdf.setArguments(argumants);
+            getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf,MOVIE_DETAILS_FRAGMENT_TAG).commit();
+        }else{
+            Intent intent = new Intent(this,MovieDetailsActivity.class);
+            intent.setData(uri);
+            startActivity(intent);
         }
     }
 }

@@ -11,6 +11,7 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -47,6 +48,10 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public static int IDX_ID = 0;
     public static int IDX_POSTER_PATH = 1;
 
+    public interface ItemSelectedCallback{
+        void onItemSelected(Uri uri);
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -68,7 +73,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
 
-        View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
+        View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
         mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
@@ -79,9 +84,8 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) mMoviesAdapter.getItem(position);
                 if (c != null) {
-                    Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-                    intent.setData(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
-                    startActivity(intent);
+                    ItemSelectedCallback collback = (ItemSelectedCallback)getActivity();
+                    collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
                 }
             }
         });
