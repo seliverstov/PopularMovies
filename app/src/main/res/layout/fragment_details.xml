@@ -27,20 +27,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/movie_title"
-                    android:textColor="@color/white"
+                    android:textColor="@android:color/white"
                     android:paddingBottom="40dp"
                     style="@style/Base.TextAppearance.AppCompat.Large" />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
+                    android:textColor="@android:color/white"
                     android:id="@+id/movie_year"
                     style="@style/Base.TextAppearance.AppCompat.Large"
                     />
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
+                    android:textColor="@android:color/white"
                     android:id="@+id/movie_rating"
                     />
             </LinearLayout>
@@ -52,6 +52,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/movie_overview"
-            android:textColor="@color/white" />
+            android:textColor="@android:color/white" />
     </LinearLayout>
 </ScrollView>

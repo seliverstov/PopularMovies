@@ -3,12 +3,13 @@ package com.seliverstov.popularmovies;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-
+import android.support.v4.content.ContextCompat;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -23,10 +24,15 @@ public class MoviesAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         ImageView newView = new ImageView(context);
         newView.setLayoutParams(new GridView.LayoutParams(
-                (int)context.getResources().getDimension(R.dimen.small_movie_poster_width),
-                (int)context.getResources().getDimension(R.dimen.small_movie_poster_height)
+                (int) context.getResources().getDimension(R.dimen.small_movie_poster_width),
+                (int) context.getResources().getDimension(R.dimen.small_movie_poster_height)
         ));
         newView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            newView.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.touch_selector));
+        }else{
+            newView.setBackground(ContextCompat.getDrawable(context, R.drawable.touch_selector));
+        }
         return newView;
     }
 
