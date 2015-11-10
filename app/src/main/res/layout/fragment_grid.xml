@@ -9,4 +9,4 @@
     android:columnWidth="@dimen/small_movie_poster_width"
     android:gravity="center"
     android:background="@android:color/black"
-    style="@style/MoviesGridStyle"/>
+    android:choiceMode="singleChoice"/>

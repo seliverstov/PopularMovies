@@ -42,6 +42,10 @@ public class MovieDetailsFragment extends Fragment {
     private static int IDX_POSTER_PATH = 4;
     private Uri mUri;
 
+    public Uri getMovieUri(){
+        return mUri;
+    }
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle arguments  = getArguments();
         if (arguments!=null){

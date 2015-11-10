@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,11 +13,13 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
+    public static final String SAVED_MOVIE_URI = MainActivity.class.getSimpleName()+".SAVED_MOVIE_URI";
 
     private static final String MOVIE_DETAILS_FRAGMENT_TAG = "MOVIE_DETAILS_FRAGMENT_TAG";
 
     private String mSortOrder;
     private boolean mTwoPane;
+    private Uri mMovieUri;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,9 +35,8 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         }
 
         if (savedInstanceState!=null){
-                String sortOrder = savedInstanceState.getString(SAVED_SORT_ORDER);
-                if (sortOrder!=null) mSortOrder = sortOrder;
-                Log.i(LOG_TAG,"Restore saved state: sortOrder = "+sortOrder);
+            if (savedInstanceState.containsKey(SAVED_SORT_ORDER)) mSortOrder = savedInstanceState.getString(SAVED_SORT_ORDER);
+            if (savedInstanceState.containsKey(SAVED_MOVIE_URI)) mMovieUri = savedInstanceState.getParcelable(SAVED_MOVIE_URI);
         }
     }
 
@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.i(LOG_TAG, "Save state: sortOrder = "+mSortOrder);
         outState.putString(SAVED_SORT_ORDER, mSortOrder);
+        outState.putParcelable(SAVED_MOVIE_URI, mMovieUri);
     }
 
     @Override
@@ -77,14 +77,26 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
             mSortOrder = sortOrder;
             MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
             if (fragment!=null) fragment.onSortOrderChanged();
+            mMovieUri = null;
+        }
 
-            /*MovieDetailsFragment mdf = (MovieDetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
-            if (mdf!=null) mdf.onSortOrderChanged();*/
+        if (mTwoPane && mMovieUri !=null){
+            MovieDetailsFragment mdf = (MovieDetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
+            Uri oldUri = null;
+            if (mdf!=null) oldUri = mdf.getMovieUri();
+            if (oldUri==null || mMovieUri!=oldUri){
+                Bundle argumants = new Bundle();
+                argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI, mMovieUri);
+                MovieDetailsFragment newFragment = new MovieDetailsFragment();
+                newFragment.setArguments(argumants);
+                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,newFragment,MOVIE_DETAILS_FRAGMENT_TAG).commit();
+            }
         }
     }
 
     @Override
     public void onItemSelected(Uri uri) {
+        mMovieUri = uri;
         if (mTwoPane){
             Bundle argumants = new Bundle();
             argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI,uri);
