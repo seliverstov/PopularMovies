@@ -37,12 +37,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private int TMDB_MOVIES_LOADER_ID = 0;
     private int CURSOR_MOVIES_LOADER_ID = 1;
 
-    private int mSelectedItem;
-
-    private static final String SAVED_SELECTED_ITEM = MoviesGridFragment.class.getSimpleName()+".SAVED_SELECTED_ITEM";
-
-    private GridView mGridView;
-
     private MoviesAdapter mMoviesAdapter;
 
     private static String[] COLUMNS = {
@@ -58,14 +52,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (mSelectedItem != GridView.INVALID_POSITION){
-            outState.putInt(SAVED_SELECTED_ITEM,mSelectedItem);
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
@@ -75,9 +61,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mMoviesAdapter.swapCursor(data);
-        if (mSelectedItem != GridView.INVALID_POSITION){
-            mGridView.smoothScrollToPosition(mSelectedItem);
-        }
     }
 
     @Override
@@ -94,7 +77,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
         final GridView gv = (GridView) view.findViewById(R.id.movies_grid);
-        mGridView = gv;
 
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -104,7 +86,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                     ItemSelectedCallback collback = (ItemSelectedCallback)getActivity();
                     collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
                 }
-                mSelectedItem = position;
             }
         });
 
@@ -129,9 +110,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         gv.setAdapter(mMoviesAdapter);
 
-        if (savedInstanceState!=null && savedInstanceState.containsKey(SAVED_SELECTED_ITEM)){
-            mSelectedItem = savedInstanceState.getInt(SAVED_SELECTED_ITEM);
-        }
         return view;
     }
 
