@@ -131,7 +131,7 @@ public class PopularMoviesProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)){
             case MOVIE: {
-                long id = db.replace(MovieEntry.TABLE_NAME, null, values);
+                long id = db.insertWithOnConflict(MovieEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(MovieEntry.CONTENT_URI, id);
                 else
@@ -139,7 +139,7 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             }
             case REVIEW: {
-                long id = db.replace(ReviewEntry.TABLE_NAME, null, values);
+                long id = db.insertWithOnConflict(ReviewEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(ReviewEntry.CONTENT_URI, id);
                 else
@@ -147,7 +147,7 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             }
             case VIDEO: {
-                long id = db.replace(VideoEntry.TABLE_NAME, null, values);
+                long id = db.insertWithOnConflict(VideoEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(VideoEntry.CONTENT_URI, id);
                 else
@@ -155,7 +155,7 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             }
             case SETTING: {
-                long id = db.replace(SettingEntry.TABLE_NAME, null, values);
+                long id = db.insertWithOnConflict(SettingEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(SettingEntry.CONTENT_URI, id);
                 else
@@ -258,7 +258,7 @@ public class PopularMoviesProvider extends ContentProvider {
         db.beginTransaction();
         try {
             for (ContentValues v : values) {
-                long id = db.replace(table, null, v);
+                long id = db.insertWithOnConflict(table, null, v, SQLiteDatabase.CONFLICT_IGNORE);
                 if (id != -1) insertedRows++;
             }
             db.setTransactionSuccessful();

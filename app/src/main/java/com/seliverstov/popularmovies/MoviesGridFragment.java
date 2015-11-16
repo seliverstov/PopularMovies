@@ -57,7 +57,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-        return new CursorLoader(getActivity(), PopularMoviesContact.MovieEntry.CONTENT_URI, COLUMNS,null,null, sortOrder);
+        return new CursorLoader(getActivity(), PopularMoviesContact.MovieEntry.CONTENT_URI, COLUMNS, PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER+" = ?",new String[]{sortOrder}, sortOrder);
     }
 
     @Override
@@ -108,6 +108,11 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                 if (loading && totalItemCount > previousTotalItemCount){
                     loading = false;
                     previousTotalItemCount = totalItemCount;
+                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    Integer page = sp.getInt("pref_page", 0);
+                    page++;
+                    sp.edit().putInt("pref_page",page).apply();
+                    Log.i(LOG_TAG, "Load id finished: set page to " + page);
                 }
 
                 if (!loading) {
@@ -156,18 +161,13 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         public Loader<Void> onCreateLoader(int id, Bundle args) {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-            Integer page = sp.getInt("pref_page",1);
-
-            return new MoviesLoader(mContext,sortOrder.replace(" ","."),page);
+            Integer page = sp.getInt("pref_page",0);
+            page++;
+            return new MoviesLoader(mContext,sortOrder,page);
         }
 
         @Override
         public void onLoadFinished(Loader<Void> loader, Void data) {
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            Integer page = sp.getInt("pref_page", 1);
-            page++;
-            sp.edit().putInt("pref_page",page).apply();
-            Log.i(LOG_TAG, "onLoadFinished: set page to " + page);
 
         }
 

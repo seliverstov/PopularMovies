@@ -50,7 +50,7 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
         }
         page++;*/
         try {
-            List<Movie> movies = new TMDBClient().listMovies(mSortOrder, mPage);
+            List<Movie> movies = new TMDBClient().listMovies(mSortOrder.replace(" ","."), mPage);
             ContentValues[] cvs = new ContentValues[movies.size()];
             for(int i=0;i<movies.size();i++){
                 ContentValues cv = new ContentValues();
@@ -69,6 +69,7 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
                 cv.put(PopularMoviesContact.MovieEntry.COLUMN_POSTER_PATH,m.getPosterPath());
                 cv.put(PopularMoviesContact.MovieEntry.COLUMN_RELEASE_DATE,m.getReleaseDate());
                 cv.put(PopularMoviesContact.MovieEntry.COLUMN_VIDEO,m.getVideo()?1:0);
+                cv.put(PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER,mSortOrder);
                 cvs[i]=cv;
             }
             int insCnt = mContext.getContentResolver().bulkInsert(PopularMoviesContact.MovieEntry.CONTENT_URI,cvs);
@@ -84,4 +85,5 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
         }
         return null;
     }
+
 }
