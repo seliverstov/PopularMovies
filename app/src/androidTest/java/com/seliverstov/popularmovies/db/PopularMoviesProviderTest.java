@@ -65,7 +65,7 @@ public class PopularMoviesProviderTest extends AndroidTestCase {
 
     public void testMovieQuries(){
         testBasicQueries(MovieEntry.CONTENT_URI,TestUtils.getSampleMovieData(), MovieEntry.COLUMN_TITLE);
-        testBulkInsert(MovieEntry.CONTENT_URI,TestUtils.getSampleMovies(100));
+        testBulkInsert(MovieEntry.CONTENT_URI, TestUtils.getSampleMovies(100));
 
     }
 
@@ -77,6 +77,11 @@ public class PopularMoviesProviderTest extends AndroidTestCase {
     public void testVideoQuries(){
         testBasicQueries(VideoEntry.CONTENT_URI,TestUtils.getSampleVideoData(), VideoEntry.COLUMN_NAME);
         testBulkInsert(VideoEntry.CONTENT_URI,TestUtils.getSampleVideos(100));
+    }
+
+    public void testSettingQuries(){
+        testBasicQueries(SettingEntry.CONTENT_URI,TestUtils.getSampleSettingData(), SettingEntry.COLUMN_VALUE);
+        testBulkInsert(SettingEntry.CONTENT_URI,TestUtils.getSampleSettings(100));
     }
 
     protected void testBulkInsert(Uri contentUri, ContentValues[] values){

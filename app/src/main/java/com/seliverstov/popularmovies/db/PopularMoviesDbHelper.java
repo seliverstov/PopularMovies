@@ -5,16 +5,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.seliverstov.popularmovies.db.PopularMoviesContact.MovieEntry;
-import com.seliverstov.popularmovies.db.PopularMoviesContact.ReviewEntry;
-import com.seliverstov.popularmovies.db.PopularMoviesContact.VideoEntry;
+import com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 
 /**
  * Created by a.g.seliverstov on 02.11.2015.
  */
 public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     public static final String LOG_TAG = PopularMoviesDbHelper.class.getSimpleName();
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 12;
     public static final String DATABASE_NAME = "popular_movies.db";
 
 
@@ -63,10 +61,17 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (" + ReviewEntry.COLUMN_MOVIE_ID + ") REFERENCES " + MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")," +
                 "UNIQUE ("+VideoEntry.COLUMN_TMDB_ID+")"+
                 ")";
+        final String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE "+ SettingEntry.TABLE_NAME + " ("+
+                SettingEntry._ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +
+                SettingEntry.COLUMN_NAME+" TEXT NOT NULL,"+
+                SettingEntry.COLUMN_VALUE+" TEXT,"+
+                "UNIQUE ("+ SettingEntry.COLUMN_NAME+")"+
+                ")";
 
         db.execSQL(SQL_CREATE_MOVIES_TABLE);
         db.execSQL(SQL_CREATE_REVIEWS_TABLE);
         db.execSQL(SQL_CREATE_VIDEOS_TABLE);
+        db.execSQL(SQL_CREATE_SETTINGS_TABLE);
         Log.i(LOG_TAG, "Database created!");
     }
 
@@ -75,6 +80,7 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + ReviewEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + VideoEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS "+ SettingEntry.TABLE_NAME);
         onCreate(db);
         Log.i(LOG_TAG, "Database upgraded!");
     }

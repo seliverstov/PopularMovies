@@ -20,8 +20,8 @@ import java.util.List;
  * Created by a.g.seliverstov on 06.11.2015.
  */
 public class MoviesLoader extends AsyncTaskLoader<Cursor> {
-    private static String LOG_TAG = MoviesLoader.class.getSimpleName();
-
+    private static final String LOG_TAG = MoviesLoader.class.getSimpleName();
+    private static final String PAGE_SETTING = "PAGE";
     private Context mContext;
 
     public MoviesLoader(Context context) {
@@ -32,9 +32,19 @@ public class MoviesLoader extends AsyncTaskLoader<Cursor> {
     @Override
     public Cursor loadInBackground() {
         Log.i(LOG_TAG,"Start load in background");
-        SQLiteDatabase db = (new PopularMoviesDbHelper(mContext)).getReadableDatabase();
-        int totalMovies = (int)DatabaseUtils.queryNumEntries(db, PopularMoviesContact.MovieEntry.TABLE_NAME);
-        int page = totalMovies / TMDBClient.DEFAULT_PAGE_SIZE + 1;
+        Cursor c = mContext.getContentResolver().query(PopularMoviesContact.SettingEntry.CONTENT_URI.buildUpon().appendPath(PAGE_SETTING).build(),new String[]{PopularMoviesContact.SettingEntry.COLUMN_VALUE},null,null,null);
+        String storedPage = null;
+        if (c.moveToFirst()){
+            storedPage = c.getString(0);
+            Log.i(LOG_TAG,"Stored page: "+storedPage);
+        }else{
+            Log.i(LOG_TAG,"Stored page not found!");
+        }
+        int page = 0;
+        if (storedPage!=null){
+            page = Integer.valueOf(storedPage);
+        }
+        page++;
         try {
             List<Movie> movies = new TMDBClient().listMovies(TMDBClient.DEFAULT_SORT_ORDER, page);
             ContentValues[] cvs = new ContentValues[movies.size()];
@@ -58,7 +68,13 @@ public class MoviesLoader extends AsyncTaskLoader<Cursor> {
                 cvs[i]=cv;
             }
             int insCnt = mContext.getContentResolver().bulkInsert(PopularMoviesContact.MovieEntry.CONTENT_URI,cvs);
-            Log.i(LOG_TAG,insCnt + " was loaded to database; page = "+page);
+            Log.i(LOG_TAG, insCnt + " was loaded to database; page = " + page);
+
+            ContentValues sPage = new ContentValues();
+            sPage.put(PopularMoviesContact.SettingEntry.COLUMN_NAME,PAGE_SETTING);
+            sPage.put(PopularMoviesContact.SettingEntry.COLUMN_VALUE, String.valueOf(page));
+            mContext.getContentResolver().insert(PopularMoviesContact.SettingEntry.CONTENT_URI, sPage);
+            Log.i(LOG_TAG, "Stored page updated to "+page);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

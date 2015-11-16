@@ -4,15 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
-import com.seliverstov.popularmovies.db.PopularMoviesContact.MovieEntry;
-import com.seliverstov.popularmovies.db.PopularMoviesContact.ReviewEntry;
-import com.seliverstov.popularmovies.db.PopularMoviesContact.VideoEntry;
+import com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
 
 /**
  * Created by a.g.seliverstov on 02.11.2015.
@@ -155,6 +151,41 @@ public class PopularMoviesDbHelperTest extends AndroidTestCase  {
         assertTrue(rowId != -1);
 
         c = db.query(VideoEntry.TABLE_NAME,null,null,null,null,null,null);
+
+        assertTrue(c.moveToFirst());
+
+        TestUtils.validateRecord(c, row);
+
+        assertFalse(c.moveToNext());
+        c.close();
+        db.close();
+    }
+
+    public void tesSettingTable(){
+        SQLiteDatabase db = (new PopularMoviesDbHelper(mContext)).getWritableDatabase();
+        Cursor c = db.rawQuery("PRAGMA table_info("+ SettingEntry.TABLE_NAME+")",null);
+        assertTrue(c.moveToFirst());
+
+        HashSet columns = new HashSet();
+        columns.add(SettingEntry._ID);
+
+
+        int columnIndex = c.getColumnIndex("name");
+
+        do{
+            columns.remove(c.getString(columnIndex));
+        }while(c.moveToNext());
+        c.close();
+
+        assertTrue(columns.isEmpty());
+
+        ContentValues row = TestUtils.getSampleSettingData();
+
+        long rowId = db.insert(SettingEntry.TABLE_NAME,null,row);
+
+        assertTrue(rowId != -1);
+
+        c = db.query(SettingEntry.TABLE_NAME,null,null,null,null,null,null);
 
         assertTrue(c.moveToFirst());
 

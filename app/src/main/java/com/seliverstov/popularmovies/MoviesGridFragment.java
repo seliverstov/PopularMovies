@@ -33,6 +33,8 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
 
     private int VISIBLE_THRESHOLD = 2;
+    private boolean loading = true;
+    private int previousTotalItemCount = 0;
 
     private int TMDB_MOVIES_LOADER_ID = 0;
     private int CURSOR_MOVIES_LOADER_ID = 1;
@@ -98,8 +100,19 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (totalItemCount > 0) {
+                if (totalItemCount < previousTotalItemCount){
+                    previousTotalItemCount = totalItemCount;
+                    if (totalItemCount==0) loading = true;
+                }
+
+                if (loading && totalItemCount > previousTotalItemCount){
+                    loading = false;
+                    previousTotalItemCount = totalItemCount;
+                }
+
+                if (!loading) {
                     if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
+                        loading = true;
                         Log.i(LOG_TAG, "Load additional movies on scroll");
                         getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
                         Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
