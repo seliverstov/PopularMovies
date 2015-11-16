@@ -125,13 +125,12 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         Log.i(LOG_TAG, "Refresh database");
         long d = getContentResolver().delete(PopularMoviesContact.MovieEntry.CONTENT_URI, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is null", null);
         Log.i(LOG_TAG, d+" records were deleted");
-        /*
+
         ContentValues cv = new ContentValues();
         cv.put(PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER, (String) null);
         long u = getContentResolver().update(PopularMoviesContact.MovieEntry.CONTENT_URI, cv, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is not null", null);
         Log.i(LOG_TAG, u+" records were updated");
-        */
-
+        
         MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
         if (fragment!=null) fragment.onSortOrderChanged();
     }

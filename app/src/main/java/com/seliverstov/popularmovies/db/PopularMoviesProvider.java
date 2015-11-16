@@ -7,7 +7,9 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import static com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 
@@ -15,6 +17,8 @@ import static com.seliverstov.popularmovies.db.PopularMoviesContact.*;
  * Created by a.g.seliverstov on 03.11.2015.
  */
 public class PopularMoviesProvider extends ContentProvider {
+    private static final String LOG_TAG = PopularMoviesProvider.class.getSimpleName();
+
     private static final UriMatcher sUriMatcher;
 
     static final int MOVIE = 100;
@@ -49,6 +53,7 @@ public class PopularMoviesProvider extends ContentProvider {
     }
 
     private PopularMoviesDbHelper mDbHelper;
+
 
     @Override
     public boolean onCreate() {
@@ -131,7 +136,7 @@ public class PopularMoviesProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)){
             case MOVIE: {
-                long id = db.insertWithOnConflict(MovieEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                long id = db.insertWithOnConflict(MovieEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_NONE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(MovieEntry.CONTENT_URI, id);
                 else
@@ -139,7 +144,7 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             }
             case REVIEW: {
-                long id = db.insertWithOnConflict(ReviewEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                long id = db.insertWithOnConflict(ReviewEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_NONE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(ReviewEntry.CONTENT_URI, id);
                 else
@@ -147,7 +152,7 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             }
             case VIDEO: {
-                long id = db.insertWithOnConflict(VideoEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                long id = db.insertWithOnConflict(VideoEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_NONE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(VideoEntry.CONTENT_URI, id);
                 else
@@ -155,7 +160,7 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             }
             case SETTING: {
-                long id = db.insertWithOnConflict(SettingEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                long id = db.insertWithOnConflict(SettingEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_NONE);
                 if (id != -1)
                     returnUri = ContentUris.withAppendedId(SettingEntry.CONTENT_URI, id);
                 else
@@ -255,13 +260,19 @@ public class PopularMoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unsupported uri:" + uri);
         }
         int insertedRows = 0;
+        int updatedRows = 0;
         db.beginTransaction();
         try {
             for (ContentValues v : values) {
                 long id = db.insertWithOnConflict(table, null, v, SQLiteDatabase.CONFLICT_IGNORE);
                 if (id != -1) insertedRows++;
+                else if (v.containsKey(BaseColumns._ID)) {
+                    db.update(table,v, BaseColumns._ID+" = ?",new String[]{String.valueOf(v.get(BaseColumns._ID))});
+                    updatedRows++;
+                }
             }
             db.setTransactionSuccessful();
+            Log.i(LOG_TAG, insertedRows+" rows were inserted, "+ updatedRows + " rows were updated");
         } finally {
             db.endTransaction();
         }
