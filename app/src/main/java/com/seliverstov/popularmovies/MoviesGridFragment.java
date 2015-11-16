@@ -114,7 +114,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                     if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                         loading = true;
                         Log.i(LOG_TAG, "Load additional movies on scroll");
-                        getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
+                        getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID,null,new MovieLoaderCallback(getActivity())).forceLoad();
                         Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
                     }
                 }
@@ -132,19 +132,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, this);
 
-        Loader l = getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new LoaderManager.LoaderCallbacks<Cursor>() {
-            @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new MoviesLoader(getActivity());
-            }
-
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {}
-        });
+        Loader l = getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity()));
 
         long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
         if (count == 0){
@@ -154,5 +142,38 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     void onSortOrderChanged(){
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID,null,this);
+        getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity())).forceLoad();
     }
+
+    class MovieLoaderCallback implements LoaderManager.LoaderCallbacks<Void>{
+        private Context mContext;
+
+        public MovieLoaderCallback(Context context){
+            mContext = context;
+        }
+
+        @Override
+        public Loader<Void> onCreateLoader(int id, Bundle args) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
+            Integer page = sp.getInt("pref_page",1);
+
+            return new MoviesLoader(mContext,sortOrder.replace(" ","."),page);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Void> loader, Void data) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Integer page = sp.getInt("pref_page", 1);
+            page++;
+            sp.edit().putInt("pref_page",page).apply();
+            Log.i(LOG_TAG, "onLoadFinished: set page to " + page);
+
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Void> loader) {
+
+        }
+    };
 }

@@ -19,20 +19,24 @@ import java.util.List;
 /**
  * Created by a.g.seliverstov on 06.11.2015.
  */
-public class MoviesLoader extends AsyncTaskLoader<Cursor> {
+public class MoviesLoader extends AsyncTaskLoader<Void> {
     private static final String LOG_TAG = MoviesLoader.class.getSimpleName();
     private static final String PAGE_SETTING = "PAGE";
     private Context mContext;
+    private String mSortOrder;
+    private Integer mPage;
 
-    public MoviesLoader(Context context) {
+    public MoviesLoader(Context context, String sortOrder, Integer page) {
         super(context);
         mContext = context;
+        mSortOrder = sortOrder;
+        mPage = page;
     }
 
     @Override
-    public Cursor loadInBackground() {
-        Log.i(LOG_TAG,"Start load in background");
-        Cursor c = mContext.getContentResolver().query(PopularMoviesContact.SettingEntry.CONTENT_URI.buildUpon().appendPath(PAGE_SETTING).build(),new String[]{PopularMoviesContact.SettingEntry.COLUMN_VALUE},null,null,null);
+    public Void loadInBackground() {
+        Log.i(LOG_TAG,"Start load in background with params: "+mSortOrder+", "+mPage);
+        /*Cursor c = mContext.getContentResolver().query(PopularMoviesContact.SettingEntry.CONTENT_URI.buildUpon().appendPath(PAGE_SETTING).build(),new String[]{PopularMoviesContact.SettingEntry.COLUMN_VALUE},null,null,null);
         String storedPage = null;
         if (c.moveToFirst()){
             storedPage = c.getString(0);
@@ -44,9 +48,9 @@ public class MoviesLoader extends AsyncTaskLoader<Cursor> {
         if (storedPage!=null){
             page = Integer.valueOf(storedPage);
         }
-        page++;
+        page++;*/
         try {
-            List<Movie> movies = new TMDBClient().listMovies(TMDBClient.DEFAULT_SORT_ORDER, page);
+            List<Movie> movies = new TMDBClient().listMovies(mSortOrder, mPage);
             ContentValues[] cvs = new ContentValues[movies.size()];
             for(int i=0;i<movies.size();i++){
                 ContentValues cv = new ContentValues();
@@ -68,13 +72,13 @@ public class MoviesLoader extends AsyncTaskLoader<Cursor> {
                 cvs[i]=cv;
             }
             int insCnt = mContext.getContentResolver().bulkInsert(PopularMoviesContact.MovieEntry.CONTENT_URI,cvs);
-            Log.i(LOG_TAG, insCnt + " was loaded to database; page = " + page);
+            Log.i(LOG_TAG, insCnt + " was loaded to database; page = " + mPage);
 
-            ContentValues sPage = new ContentValues();
+            /*ContentValues sPage = new ContentValues();
             sPage.put(PopularMoviesContact.SettingEntry.COLUMN_NAME,PAGE_SETTING);
             sPage.put(PopularMoviesContact.SettingEntry.COLUMN_VALUE, String.valueOf(page));
             mContext.getContentResolver().insert(PopularMoviesContact.SettingEntry.CONTENT_URI, sPage);
-            Log.i(LOG_TAG, "Stored page updated to "+page);
+            Log.i(LOG_TAG, "Stored page updated to "+page);*/
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

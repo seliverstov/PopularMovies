@@ -1,19 +1,24 @@
 package com.seliverstov.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.seliverstov.popularmovies.db.PopularMoviesContact;
 
 public class MainActivity extends AppCompatActivity implements MoviesGridFragment.ItemSelectedCallback{
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
     public static final String SAVED_MOVIE_URI = MainActivity.class.getSimpleName()+".SAVED_MOVIE_URI";
+    public static final String SAVED_PAGE = MainActivity.class.getSimpleName()+".SAVED_PAGE";
 
     private static final String MOVIE_DETAILS_FRAGMENT_TAG = "MOVIE_DETAILS_FRAGMENT_TAG";
 
@@ -54,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
                 Intent intent = new Intent(this,SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.action_refresh:
+                refresh();
+                return true;
             default: return super.onOptionsItemSelected(item);
         }
     }
@@ -74,10 +82,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         if (mSortOrder ==null) mSortOrder = sortOrder;
 
         if (!mSortOrder.equals(sortOrder)){
-            mSortOrder = sortOrder;
-            MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
-            if (fragment!=null) fragment.onSortOrderChanged();
-            mMovieUri = null;
+            refresh();
         }
 
         if (mTwoPane && mMovieUri !=null){
@@ -108,5 +113,24 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
             intent.setData(uri);
             startActivity(intent);
         }
+    }
+
+    protected void refresh(){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
+        mSortOrder = sortOrder;
+        mMovieUri = null;
+        sp.edit().putInt("pref_page",1).apply();
+
+        Log.i(LOG_TAG, "Refresh database");
+        long d = getContentResolver().delete(PopularMoviesContact.MovieEntry.CONTENT_URI, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is null", null);
+        Log.i(LOG_TAG, d+" records were deleted");
+        ContentValues cv = new ContentValues();
+        cv.put(PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER, (String) null);
+        long u = getContentResolver().update(PopularMoviesContact.MovieEntry.CONTENT_URI, cv, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is not null", null);
+        Log.i(LOG_TAG, u+" records were updated");
+
+        MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
+        if (fragment!=null) fragment.onSortOrderChanged();
     }
 }

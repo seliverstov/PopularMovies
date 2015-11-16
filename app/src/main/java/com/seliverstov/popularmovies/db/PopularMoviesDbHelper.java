@@ -12,7 +12,7 @@ import com.seliverstov.popularmovies.db.PopularMoviesContact.*;
  */
 public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     public static final String LOG_TAG = PopularMoviesDbHelper.class.getSimpleName();
-    public static final int DATABASE_VERSION = 12;
+    public static final int DATABASE_VERSION = 15;
     public static final String DATABASE_NAME = "popular_movies.db";
 
 
@@ -36,7 +36,9 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_TITLE + " TEXT," +
                 MovieEntry.COLUMN_VIDEO + " TEXT," +
                 MovieEntry.COLUMN_VOTE_AVERAGE + " REAL," +
-                MovieEntry.COLUMN_VOTE_COUNT + " INTEGER" +
+                MovieEntry.COLUMN_VOTE_COUNT + " INTEGER," +
+                MovieEntry.COLUMN_FAVORITE+ " INTEGER," +
+                MovieEntry.COLUMN_SORT_ORDER + " TEXT" +
                 ");";
         final String SQL_CREATE_REVIEWS_TABLE = "CREATE TABLE " + ReviewEntry.TABLE_NAME + " (" +
                 ReviewEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
