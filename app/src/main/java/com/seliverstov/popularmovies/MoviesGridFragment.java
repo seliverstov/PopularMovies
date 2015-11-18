@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +50,7 @@ public class MoviesGridFragment extends Fragment {
 
     public static int IDX_ID = 0;
     public static int IDX_POSTER_PATH = 1;
+    private GridView mGridView;
 
     public interface ItemSelectedCallback{
         void onItemSelected(Uri uri);
@@ -62,20 +64,20 @@ public class MoviesGridFragment extends Fragment {
 
         mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
-        final GridView gv = (GridView) view.findViewById(R.id.movies_grid);
+        mGridView = (GridView) view.findViewById(R.id.movies_grid);
 
-        gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) mMoviesAdapter.getItem(position);
                 if (c != null) {
-                    ItemSelectedCallback collback = (ItemSelectedCallback)getActivity();
+                    ItemSelectedCallback collback = (ItemSelectedCallback) getActivity();
                     collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
                 }
             }
         });
 
-        gv.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -85,17 +87,17 @@ public class MoviesGridFragment extends Fragment {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 SettingsManager settingsManager = new SettingsManager(getActivity());
-                if (totalItemCount < previousTotalItemCount){
+                if (totalItemCount < previousTotalItemCount) {
                     previousTotalItemCount = totalItemCount;
-                    if (totalItemCount==0) loading = true;
+                    if (totalItemCount == 0) loading = true;
                 }
 
-                if (loading && totalItemCount > previousTotalItemCount){
+                if (loading && totalItemCount > previousTotalItemCount) {
                     loading = false;
                     previousTotalItemCount = totalItemCount;
                     Log.i(LOG_TAG, "Load on scroll is finished");
                 }
-                if (!settingsManager.isFavoriteSortOrder()){
+                if (!settingsManager.isFavoriteSortOrder()) {
                     if (!loading) {
                         if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                             loading = true;
@@ -108,7 +110,7 @@ public class MoviesGridFragment extends Fragment {
             }
         });
 
-        gv.setAdapter(mMoviesAdapter);
+        mGridView.setAdapter(mMoviesAdapter);
 
         return view;
     }
@@ -128,7 +130,7 @@ public class MoviesGridFragment extends Fragment {
     }
 
     void onSortOrderChanged(){
-        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity()));
+        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();
 
         SettingsManager settingsManager = new SettingsManager(getActivity());
         if (!settingsManager.isFavoriteSortOrder())
@@ -188,6 +190,19 @@ public class MoviesGridFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             mMoviesAdapter.swapCursor(data);
+            if (mGridView.getCheckedItemPosition()==GridView.INVALID_POSITION){
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mGridView.setItemChecked(mGridView.getFirstVisiblePosition(),true);
+                        Cursor c = (Cursor) mMoviesAdapter.getItem(mGridView.getFirstVisiblePosition());
+                        if (c != null) {
+                            ItemSelectedCallback collback = (ItemSelectedCallback) getActivity();
+                            collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
+                        }
+                    }
+                });
+            }
         }
 
         @Override

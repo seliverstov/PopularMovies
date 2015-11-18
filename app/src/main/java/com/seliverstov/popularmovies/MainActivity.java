@@ -28,6 +28,11 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (savedInstanceState!=null){
+            if (savedInstanceState.containsKey(SAVED_SORT_ORDER)) mSortOrder = savedInstanceState.getInt(SAVED_SORT_ORDER);
+            if (savedInstanceState.containsKey(SAVED_MOVIE_URI)) mMovieUri = savedInstanceState.getParcelable(SAVED_MOVIE_URI);
+        }
+
         if (findViewById(R.id.details_fragment_container)!=null){
             mTwoPane = true;
             if (savedInstanceState==null){
@@ -35,11 +40,6 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
             }
         }else{
             mTwoPane = false;
-        }
-
-        if (savedInstanceState!=null){
-            if (savedInstanceState.containsKey(SAVED_SORT_ORDER)) mSortOrder = savedInstanceState.getInt(SAVED_SORT_ORDER);
-            if (savedInstanceState.containsKey(SAVED_MOVIE_URI)) mMovieUri = savedInstanceState.getParcelable(SAVED_MOVIE_URI);
         }
     }
 
@@ -99,6 +99,10 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
     @Override
     public void onItemSelected(Uri uri) {
+        if (mMovieUri == null && !mTwoPane) {
+            mMovieUri = uri;
+            return;
+        }
         mMovieUri = uri;
         if (mTwoPane){
             Bundle argumants = new Bundle();
