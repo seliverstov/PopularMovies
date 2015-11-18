@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
         if (mSortOrder ==null) mSortOrder = settingsManager.getCurrentSortOrder();
 
-        if (!mSortOrder.equals(settingsManager)){
+        if (!mSortOrder.equals(settingsManager.getCurrentSortOrder())){
             refresh();
         }
 

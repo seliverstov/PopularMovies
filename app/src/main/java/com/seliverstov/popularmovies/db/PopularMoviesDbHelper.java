@@ -12,7 +12,7 @@ import com.seliverstov.popularmovies.db.PopularMoviesContact.*;
  */
 public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     public static final String LOG_TAG = PopularMoviesDbHelper.class.getSimpleName();
-    public static final int DATABASE_VERSION = 18;
+    public static final int DATABASE_VERSION = 19;
     public static final String DATABASE_NAME = "popular_movies.db";
 
 

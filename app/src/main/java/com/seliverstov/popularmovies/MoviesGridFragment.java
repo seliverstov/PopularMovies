@@ -30,7 +30,7 @@ import com.seliverstov.popularmovies.model.SettingsManager;
 /**
  * Created by a.g.seliverstov on 12.10.2015.
  */
-public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MoviesGridFragment extends Fragment {
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
 
     private int VISIBLE_THRESHOLD = 2;
@@ -52,35 +52,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     public interface ItemSelectedCallback{
         void onItemSelected(Uri uri);
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        SettingsManager settingsManager = new SettingsManager(getActivity());
-        String selectionCriteria = settingsManager.isFavoriteSortOrder()?
-                PopularMoviesContact.MovieEntry.COLUMN_FAVORITE+" is not null":
-                PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER+" = ?";
-        String[] selectionArgs = settingsManager.isFavoriteSortOrder()?
-                null:
-                new String[]{settingsManager.getSortOrderForDb()};
-
-        return new CursorLoader(
-                getActivity(),
-                PopularMoviesContact.MovieEntry.CONTENT_URI,
-                COLUMNS,
-                selectionCriteria,
-                selectionArgs,
-                settingsManager.getSortOrderForDb());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mMoviesAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mMoviesAdapter.swapCursor(null);
     }
 
     @Override
@@ -129,7 +100,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                         if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                             loading = true;
                             Log.i(LOG_TAG, "Load additional movies on scroll");
-                            getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID,null,new MovieLoaderCallback(getActivity())).forceLoad();
+                            getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
                             Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
                         }
                     }
@@ -146,21 +117,22 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, this);
+        getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity()));
 
-        Loader l = getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity()));
+        getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity()));
 
         long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
         if (count == 0){
-            l.forceLoad();
+            getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
         }
     }
 
     void onSortOrderChanged(){
-        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, this);
+        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity()));
+
         SettingsManager settingsManager = new SettingsManager(getActivity());
         if (!settingsManager.isFavoriteSortOrder())
-            getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity())).forceLoad();
+            getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
     }
 
     class MovieLoaderCallback implements LoaderManager.LoaderCallbacks<Void>{
@@ -172,8 +144,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         @Override
         public Loader<Void> onCreateLoader(int id, Bundle args) {
-            SettingsManager settingsManager = new SettingsManager(mContext);
-            return new MoviesLoader(mContext,settingsManager.getSortOrderForWeb(),settingsManager.getCurrentPage()+1);
+            return new MoviesLoader(mContext);
         }
 
         @Override
@@ -186,4 +157,42 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         }
     };
+
+    class CursorLoaderCallback implements LoaderManager.LoaderCallbacks<Cursor> {
+        private Context mContext;
+
+        public CursorLoaderCallback(Context context){
+            mContext = context;
+        }
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            SettingsManager settingsManager = new SettingsManager(mContext);
+
+            String selectionCriteria = settingsManager.isFavoriteSortOrder()?
+                    PopularMoviesContact.MovieEntry.COLUMN_FAVORITE+" is not null":
+                    PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER+" = ?";
+            String[] selectionArgs = settingsManager.isFavoriteSortOrder()?
+                    null:
+                    new String[]{settingsManager.getSortOrderForDb()};
+
+            return new CursorLoader(
+                    mContext,
+                    PopularMoviesContact.MovieEntry.CONTENT_URI,
+                    COLUMNS,
+                    selectionCriteria,
+                    selectionArgs,
+                    settingsManager.getSortOrderForDb());
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            mMoviesAdapter.swapCursor(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mMoviesAdapter.swapCursor(null);
+        }
+    }
 }

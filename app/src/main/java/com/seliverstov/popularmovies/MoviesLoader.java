@@ -23,32 +23,14 @@ import java.util.List;
 public class MoviesLoader extends AsyncTaskLoader<Void> {
     private static final String LOG_TAG = MoviesLoader.class.getSimpleName();
     private Context mContext;
-    private String mSortOrder;
-    private Integer mPage;
 
-    public MoviesLoader(Context context, String sortOrder, Integer page) {
+    public MoviesLoader(Context context) {
         super(context);
         mContext = context;
-        mSortOrder = sortOrder;
-        mPage = page;
     }
 
     @Override
     public Void loadInBackground() {
-
-        /*Cursor c = mContext.getContentResolver().query(PopularMoviesContact.SettingEntry.CONTENT_URI.buildUpon().appendPath(PAGE_SETTING).build(),new String[]{PopularMoviesContact.SettingEntry.COLUMN_VALUE},null,null,null);
-        String storedPage = null;
-        if (c.moveToFirst()){
-            storedPage = c.getString(0);
-            Log.i(LOG_TAG,"Stored page: "+storedPage);
-        }else{
-            Log.i(LOG_TAG,"Stored page not found!");
-        }
-        int page = 0;
-        if (storedPage!=null){
-            page = Integer.valueOf(storedPage);
-        }
-        page++;*/
         try {
             SettingsManager settingsManager = new SettingsManager(mContext);
             String sortOrder = settingsManager.getSortOrderForWeb();
@@ -79,12 +61,6 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
             int insCnt = mContext.getContentResolver().bulkInsert(PopularMoviesContact.MovieEntry.CONTENT_URI,cvs);
             settingsManager.setCurrentPage(page);
             Log.i(LOG_TAG, insCnt + " was loaded to database; page = " + page);
-
-            /*ContentValues sPage = new ContentValues();
-            sPage.put(PopularMoviesContact.SettingEntry.COLUMN_NAME,PAGE_SETTING);
-            sPage.put(PopularMoviesContact.SettingEntry.COLUMN_VALUE, String.valueOf(page));
-            mContext.getContentResolver().insert(PopularMoviesContact.SettingEntry.CONTENT_URI, sPage);
-            Log.i(LOG_TAG, "Stored page updated to "+page);*/
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
