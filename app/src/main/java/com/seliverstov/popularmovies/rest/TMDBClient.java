@@ -47,6 +47,7 @@ public class TMDBClient {
     public List<Review> listReviews(String movieId)  throws IOException {
         Call<Reviews> call = this.service.getReviews(movieId, TMDBKey.API_KEY);
         Response<Reviews> res =  call.execute();
+        Log.i(LOG_TAG,res.raw().request().urlString());
         Reviews result = res.body();
         return result.getResults();
     }
@@ -54,6 +55,7 @@ public class TMDBClient {
     public List<Video> listVideos(String movieId)  throws IOException {
         Call<Videos> call = this.service.getVideos(movieId, TMDBKey.API_KEY);
         Response<Videos> res =  call.execute();
+        Log.i(LOG_TAG,res.raw().request().urlString());
         Videos result = res.body();
         return result.getResults();
     }

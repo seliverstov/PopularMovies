@@ -2,9 +2,10 @@ package com.seliverstov.popularmovies;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,10 +15,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CursorAdapter;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.seliverstov.popularmovies.loader.ReviewsLoader;
 import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
@@ -32,7 +36,8 @@ public class MovieDetailsFragment extends Fragment {
 
     public static final String MOVIE_DETAILS_URI = "MOVIE_DETAILS_URI";
 
-    private static String[] COLUMNS = {
+
+    private static String[] MOVIE_COLUMNS = {
             MovieEntry._ID,
             MovieEntry.COLUMN_ORIGINAL_TITLE,
             MovieEntry.COLUMN_RELEASE_DATE,
@@ -42,8 +47,18 @@ public class MovieDetailsFragment extends Fragment {
             MovieEntry.COLUMN_FAVORITE
     };
 
-    public static final int CURSOR_MOVIE_DETAILS_LOADER = 2;
-    public static final int TMDB_MOVIE_DETAILS_LOADER = 3;
+    private static String[] REVIEW_COLUMNS = {
+            ReviewEntry._ID,
+            ReviewEntry.COLUMN_AUTHOR,
+            ReviewEntry.COLUMN_CONTENT,
+            ReviewEntry.COLUMN_URL
+    };
+
+    private static final int CURSOR_MOVIE_DETAILS_LOADER = 2;
+    private static final int CURSOR_MOVIE_REVIEWS_LOADER = 3;
+
+    private static final int TMDB_MOVIE_REVIEWS_LOADER = 4;
+    private static final int TMDB_MOVIE_VIDEOS_LOADER = 5;
 
     private static int IDX_ID = 0;
     private static int IDX_ORIGINAL_TITLE = 1;
@@ -52,6 +67,11 @@ public class MovieDetailsFragment extends Fragment {
     private static int IDX_OVERVIEW = 4;
     private static int IDX_POSTER_PATH = 5;
     private static int IDX_FAVORITE = 6;
+
+    private static int IDX_REVIEW_AUTHOR = 1;
+    private static int IDX_REVIEW_CONTENT = 2;
+    private static int IDX_REVIEW_URL = 3;
+
     private Uri mUri;
     private TextView mTitle;
     private TextView mYear;
@@ -59,6 +79,7 @@ public class MovieDetailsFragment extends Fragment {
     private TextView mOverview;
     private ImageView mPoster;
     private Button mFavorite;
+    private ListView mReviews;
 
     public Uri getMovieUri(){
         return mUri;
@@ -72,7 +93,8 @@ public class MovieDetailsFragment extends Fragment {
 
         if (mUri==null) return null;
 
-        final View view = inflater.inflate(R.layout.fragment_details, container, false);
+        final View view = inflater.inflate(R.layout.movie_details, container, false);
+
         mTitle = (TextView)view.findViewById(R.id.movie_title);
         mYear = (TextView)view.findViewById(R.id.movie_year);
         mRating = (TextView)view.findViewById(R.id.movie_rating);
@@ -80,24 +102,32 @@ public class MovieDetailsFragment extends Fragment {
         mPoster = (ImageView)view.findViewById(R.id.movie_poster);
         mFavorite = (Button)view.findViewById(R.id.favorite);
 
-        return view;
+
+        final View rootView = inflater.inflate(R.layout.fragment_details,container,false);
+        mReviews = (ListView)rootView.findViewById(R.id.movie_reviews);
+        mReviews.setAdapter(new ReviewAdapter(getActivity(),null,0));
+        mReviews.addHeaderView(view);
+
+        return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(CURSOR_MOVIE_DETAILS_LOADER,null,new CursorLoaderCallback()).forceLoad();
+        getLoaderManager().initLoader(CURSOR_MOVIE_DETAILS_LOADER,null,new CursorDetailsCallback()).forceLoad();
+        getLoaderManager().initLoader(CURSOR_MOVIE_REVIEWS_LOADER, null, new CursorReviewsCallback()).forceLoad();
+        getLoaderManager().initLoader(TMDB_MOVIE_REVIEWS_LOADER,null, new TMDBReviewsCallback()).forceLoad();
     }
 
     public void onSortOrderChange(){
 
     }
 
-    class CursorLoaderCallback implements LoaderManager.LoaderCallbacks<Cursor>{
+    class CursorDetailsCallback implements LoaderManager.LoaderCallbacks<Cursor>{
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             if (mUri!=null)
-                return new CursorLoader(getActivity(),mUri,COLUMNS,null,null,null);
+                return new CursorLoader(getActivity(),mUri, MOVIE_COLUMNS,null,null,null);
             else
                 return null;
         }
@@ -163,11 +193,15 @@ public class MovieDetailsFragment extends Fragment {
         }
     }
 
-    class TMDBLoaderCallback implements LoaderManager.LoaderCallbacks<Void>{
+    class TMDBReviewsCallback implements LoaderManager.LoaderCallbacks<Void>{
 
         @Override
         public Loader<Void> onCreateLoader(int id, Bundle args) {
-            return null;
+            if (mUri!=null) {
+                String movieId = String.valueOf(ContentUris.parseId(mUri));
+                return new ReviewsLoader(getActivity(), movieId);
+            }else
+                return null;
         }
 
         @Override
@@ -178,6 +212,61 @@ public class MovieDetailsFragment extends Fragment {
         @Override
         public void onLoaderReset(Loader<Void> loader) {
 
+        }
+    }
+
+    private class CursorReviewsCallback implements LoaderManager.LoaderCallbacks<Cursor> {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            if (mUri!=null) {
+                long movieId = ContentUris.parseId(mUri);
+                return new CursorLoader(getActivity(), ReviewEntry.CONTENT_URI, REVIEW_COLUMNS, ReviewEntry.COLUMN_MOVIE_ID+" = ?", new String[]{String.valueOf(movieId)}, null);
+            }else
+                return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.i(LOG_TAG,"Reviews cursor size is: "+data.getCount());
+            ((CursorAdapter)((HeaderViewListAdapter)mReviews.getAdapter()).getWrappedAdapter()).swapCursor(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            ((CursorAdapter)((HeaderViewListAdapter)mReviews.getAdapter()).getWrappedAdapter()).swapCursor(null);
+        }
+    }
+
+    private class ReviewAdapter extends CursorAdapter {
+        private class ViewHolder{
+            public TextView mAuthor;
+            public TextView mContent;
+            public TextView mUrl;
+
+            public ViewHolder(View view){
+                mAuthor = (TextView)view.findViewById(R.id.review_item_author);
+                mContent = (TextView)view.findViewById(R.id.review_item_content);
+                mUrl = (TextView)view.findViewById(R.id.review_item_url);
+            }
+        }
+        public ReviewAdapter(Context context, Cursor c, int flags) {
+            super(context, c, flags);
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            final View view = LayoutInflater.from(context).inflate(R.layout.review_item,parent,false);
+            ViewHolder vh = new ViewHolder(view);
+            view.setTag(vh);
+            return view;
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            ViewHolder vh = (ViewHolder)view.getTag();
+            vh.mAuthor.setText(cursor.getString(IDX_REVIEW_AUTHOR));
+            vh.mContent.setText(cursor.getString(IDX_REVIEW_CONTENT));
+            vh.mUrl.setText(cursor.getString(IDX_REVIEW_URL));
         }
     }
 }

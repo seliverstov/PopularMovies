@@ -12,7 +12,7 @@ import java.util.List;
  * Created by Alexander on 30.10.2015.
  */
 public class TMDBClientTest extends AndroidTestCase {
-    private static final String MOVIE_ID_FOR_REVIEWS = "286217";
+    private static final String MOVIE_ID_FOR_REVIEWS = "257344";
     private static final String MOVIE_ID_FOR_VIDEOS = "211672";
     private static final String SORT_ORDER = "popularity.desc";
     TMDBClient client;
@@ -36,6 +36,7 @@ public class TMDBClientTest extends AndroidTestCase {
         List res = client.listReviews(MOVIE_ID_FOR_REVIEWS);
         assertNotNull(res);
         assertTrue(res.size() > 0);
+        assertEquals(res.size(),2);
         Review review =(Review)res.get(0);
         assertNotNull(review.getId());
         assertNotNull(review.getAuthor());
