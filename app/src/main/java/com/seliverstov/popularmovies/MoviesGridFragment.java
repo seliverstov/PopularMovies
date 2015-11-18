@@ -24,6 +24,7 @@ import android.widget.GridView;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
+import com.seliverstov.popularmovies.model.SettingsManager;
 
 
 /**
@@ -55,9 +56,21 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-        return new CursorLoader(getActivity(), PopularMoviesContact.MovieEntry.CONTENT_URI, COLUMNS, PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER+" = ?",new String[]{sortOrder}, sortOrder);
+        SettingsManager settingsManager = new SettingsManager(getActivity());
+        String selectionCriteria = settingsManager.isFavoriteSortOrder()?
+                PopularMoviesContact.MovieEntry.COLUMN_FAVORITE+" is not null":
+                PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER+" = ?";
+        String[] selectionArgs = settingsManager.isFavoriteSortOrder()?
+                null:
+                new String[]{settingsManager.getSortOrderForDb()};
+
+        return new CursorLoader(
+                getActivity(),
+                PopularMoviesContact.MovieEntry.CONTENT_URI,
+                COLUMNS,
+                selectionCriteria,
+                selectionArgs,
+                settingsManager.getSortOrderForDb());
     }
 
     @Override
@@ -100,6 +113,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                SettingsManager settingsManager = new SettingsManager(getActivity());
                 if (totalItemCount < previousTotalItemCount){
                     previousTotalItemCount = totalItemCount;
                     if (totalItemCount==0) loading = true;
@@ -108,19 +122,16 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                 if (loading && totalItemCount > previousTotalItemCount){
                     loading = false;
                     previousTotalItemCount = totalItemCount;
-                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    Integer page = sp.getInt("pref_page", 0);
-                    page++;
-                    sp.edit().putInt("pref_page",page).apply();
-                    Log.i(LOG_TAG, "Load id finished: set page to " + page);
+                    Log.i(LOG_TAG, "Load on scroll is finished");
                 }
-
-                if (!loading) {
-                    if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
-                        loading = true;
-                        Log.i(LOG_TAG, "Load additional movies on scroll");
-                        getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID,null,new MovieLoaderCallback(getActivity())).forceLoad();
-                        Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
+                if (!settingsManager.isFavoriteSortOrder()){
+                    if (!loading) {
+                        if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
+                            loading = true;
+                            Log.i(LOG_TAG, "Load additional movies on scroll");
+                            getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID,null,new MovieLoaderCallback(getActivity())).forceLoad();
+                            Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
+                        }
                     }
                 }
             }
@@ -146,8 +157,10 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     void onSortOrderChanged(){
-        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID,null,this);
-        getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity())).forceLoad();
+        getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, this);
+        SettingsManager settingsManager = new SettingsManager(getActivity());
+        if (!settingsManager.isFavoriteSortOrder())
+            getLoaderManager().restartLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity())).forceLoad();
     }
 
     class MovieLoaderCallback implements LoaderManager.LoaderCallbacks<Void>{
@@ -159,11 +172,8 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         @Override
         public Loader<Void> onCreateLoader(int id, Bundle args) {
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-            Integer page = sp.getInt("pref_page",0);
-            page++;
-            return new MoviesLoader(mContext,sortOrder,page);
+            SettingsManager settingsManager = new SettingsManager(mContext);
+            return new MoviesLoader(mContext,settingsManager.getSortOrderForWeb(),settingsManager.getCurrentPage()+1);
         }
 
         @Override

@@ -26,8 +26,8 @@ import retrofit.Retrofit;
 public class TMDBClient {
     public static final String LOG_TAG = TMDBClient.class.getSimpleName();
     public static final String BASE_URL = "https://api.themoviedb.org/";
-    public static final String DEFAULT_SORT_ORDER = "popularity.desc";
-    public static final int DEFAULT_PAGE_SIZE = 20;
+    public static final String SORT_ORDER_POPULARIRY_DESC = "popularity.desc";
+    public static final String SORT_ORDER_VOTE_AVERAGE_DESC = "vote_average.desc";
 
     private TMDBService service;
 

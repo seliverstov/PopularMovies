@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
+import com.seliverstov.popularmovies.model.SettingsManager;
 import com.seliverstov.popularmovies.rest.TMDBClient;
 import com.seliverstov.popularmovies.rest.model.Movie;
 
@@ -21,7 +22,6 @@ import java.util.List;
  */
 public class MoviesLoader extends AsyncTaskLoader<Void> {
     private static final String LOG_TAG = MoviesLoader.class.getSimpleName();
-    private static final String PAGE_SETTING = "PAGE";
     private Context mContext;
     private String mSortOrder;
     private Integer mPage;
@@ -35,7 +35,7 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
 
     @Override
     public Void loadInBackground() {
-        Log.i(LOG_TAG,"Start load in background with params: "+mSortOrder+", "+mPage);
+
         /*Cursor c = mContext.getContentResolver().query(PopularMoviesContact.SettingEntry.CONTENT_URI.buildUpon().appendPath(PAGE_SETTING).build(),new String[]{PopularMoviesContact.SettingEntry.COLUMN_VALUE},null,null,null);
         String storedPage = null;
         if (c.moveToFirst()){
@@ -50,7 +50,11 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
         }
         page++;*/
         try {
-            List<Movie> movies = new TMDBClient().listMovies(mSortOrder.replace(" ","."), mPage);
+            SettingsManager settingsManager = new SettingsManager(mContext);
+            String sortOrder = settingsManager.getSortOrderForWeb();
+            int page = settingsManager.getCurrentPage()+1;
+            Log.i(LOG_TAG,"Start load in background with params: "+sortOrder+", "+page);
+            List<Movie> movies = new TMDBClient().listMovies(sortOrder,page);
             ContentValues[] cvs = new ContentValues[movies.size()];
             for(int i=0;i<movies.size();i++){
                 ContentValues cv = new ContentValues();
@@ -69,11 +73,12 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
                 cv.put(PopularMoviesContact.MovieEntry.COLUMN_POSTER_PATH,m.getPosterPath());
                 cv.put(PopularMoviesContact.MovieEntry.COLUMN_RELEASE_DATE,m.getReleaseDate());
                 cv.put(PopularMoviesContact.MovieEntry.COLUMN_VIDEO,m.getVideo()?1:0);
-                cv.put(PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER,mSortOrder);
+                cv.put(PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER,settingsManager.getSortOrderForDb());
                 cvs[i]=cv;
             }
             int insCnt = mContext.getContentResolver().bulkInsert(PopularMoviesContact.MovieEntry.CONTENT_URI,cvs);
-            Log.i(LOG_TAG, insCnt + " was loaded to database; page = " + mPage);
+            settingsManager.setCurrentPage(page);
+            Log.i(LOG_TAG, insCnt + " was loaded to database; page = " + page);
 
             /*ContentValues sPage = new ContentValues();
             sPage.put(PopularMoviesContact.SettingEntry.COLUMN_NAME,PAGE_SETTING);

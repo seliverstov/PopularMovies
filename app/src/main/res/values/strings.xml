@@ -6,7 +6,11 @@
     <string name="refresh">Refresh</string>
     <string name="pref_sort_by_title">Sort by</string>
     <string name="pref_sort_by_key" translatable="false">sort_by</string>
-    <string name="pref_sort_by_default" translatable="false">popularity desc</string>
+    <string name="pref_sort_by_default" translatable="false">0</string>
+
+    <string name="pref_page_key" translatable="false">page</string>
+    <string name="pref_page_default" translatable="false">0</string>
+
     <string name="cant_load_movies">Ooops :( Can\'t load movies. Check your network connection!</string>
     <string name="details">Details</string>
     <string name="loading">Loading</string>
@@ -14,10 +18,12 @@
     <string-array name="pref_sort_by_entries">
         <item>Popularity</item>
         <item>Rating</item>
+        <item>Favorite</item>
     </string-array>
     <string-array name="pref_sort_by_values" translatable="false">
-        <item>popularity desc</item>
-        <item>vote_average desc</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
     <string name="movie_poster_base_url">http://image.tmdb.org/t/p/</string>
     <string name="small_movie_poster_size" translatable="false">w185</string>

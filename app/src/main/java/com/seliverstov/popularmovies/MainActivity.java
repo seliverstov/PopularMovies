@@ -2,27 +2,25 @@ package com.seliverstov.popularmovies;
 
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
+import com.seliverstov.popularmovies.model.SettingsManager;
 
 public class MainActivity extends AppCompatActivity implements MoviesGridFragment.ItemSelectedCallback{
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
     public static final String SAVED_MOVIE_URI = MainActivity.class.getSimpleName()+".SAVED_MOVIE_URI";
-    public static final String SAVED_PAGE = MainActivity.class.getSimpleName()+".SAVED_PAGE";
 
     private static final String MOVIE_DETAILS_FRAGMENT_TAG = "MOVIE_DETAILS_FRAGMENT_TAG";
 
-    private String mSortOrder;
+    private Integer mSortOrder;
     private boolean mTwoPane;
     private Uri mMovieUri;
 
@@ -40,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         }
 
         if (savedInstanceState!=null){
-            if (savedInstanceState.containsKey(SAVED_SORT_ORDER)) mSortOrder = savedInstanceState.getString(SAVED_SORT_ORDER);
+            if (savedInstanceState.containsKey(SAVED_SORT_ORDER)) mSortOrder = savedInstanceState.getInt(SAVED_SORT_ORDER);
             if (savedInstanceState.containsKey(SAVED_MOVIE_URI)) mMovieUri = savedInstanceState.getParcelable(SAVED_MOVIE_URI);
         }
     }
@@ -69,19 +67,19 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SAVED_SORT_ORDER, mSortOrder);
+        outState.putInt(SAVED_SORT_ORDER, mSortOrder);
         outState.putParcelable(SAVED_MOVIE_URI, mMovieUri);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
 
-        if (mSortOrder ==null) mSortOrder = sortOrder;
+        SettingsManager settingsManager = new SettingsManager(this);
 
-        if (!mSortOrder.equals(sortOrder)){
+        if (mSortOrder ==null) mSortOrder = settingsManager.getCurrentSortOrder();
+
+        if (!mSortOrder.equals(settingsManager)){
             refresh();
         }
 
@@ -116,11 +114,11 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     }
 
     protected void refresh(){
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String sortOrder = sp.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default));
-        mSortOrder = sortOrder;
+        SettingsManager settingsManager = new SettingsManager(this);
+        mSortOrder = settingsManager.getCurrentSortOrder();
         mMovieUri = null;
-        sp.edit().putInt("pref_page",0).apply();
+
+        settingsManager.setCurrentPage(0);
 
         Log.i(LOG_TAG, "Refresh database");
         long d = getContentResolver().delete(PopularMoviesContact.MovieEntry.CONTENT_URI, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is null", null);
@@ -130,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         cv.put(PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER, (String) null);
         long u = getContentResolver().update(PopularMoviesContact.MovieEntry.CONTENT_URI, cv, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is not null", null);
         Log.i(LOG_TAG, u+" records were updated");
-        
+
         MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
         if (fragment!=null) fragment.onSortOrderChanged();
     }
