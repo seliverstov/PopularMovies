@@ -56,5 +56,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/movie_overview"
             android:textColor="@android:color/white" />
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/movie_reviews"
+            ></ListView>
     </LinearLayout>
 </ScrollView>
