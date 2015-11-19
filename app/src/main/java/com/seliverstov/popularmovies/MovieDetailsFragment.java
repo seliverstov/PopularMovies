@@ -11,16 +11,19 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +42,8 @@ public class MovieDetailsFragment extends Fragment {
     public static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
 
     public static final String MOVIE_DETAILS_URI = "MOVIE_DETAILS_URI";
+    public static final String YOUTUBE_BASE_URL = "http://www.youtube.com/watch?v=";
+    public static final String YOUTUBE = "youtube";
 
 
     private static String[] MOVIE_COLUMNS = {
@@ -98,10 +103,19 @@ public class MovieDetailsFragment extends Fragment {
     private LinearLayout mReviews;
     private LinearLayout mVideos;
 
+    private String mTrailerLink;
+
     public Uri getMovieUri(){
         return mUri;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle arguments  = getArguments();
         if (arguments!=null){
@@ -139,6 +153,17 @@ public class MovieDetailsFragment extends Fragment {
 
     public void onSortOrderChange(){
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu,inflater);
+        inflater.inflate(R.menu.details_menu,menu);
+        MenuItem shareItem =  menu.findItem(R.id.action_share);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT,mTrailerLink);
+        ((ShareActionProvider) MenuItemCompat.getActionProvider(shareItem)).setShareIntent(Intent.createChooser(intent,getString(R.string.share_trailer)));
     }
 
     class CursorDetailsCallback implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -336,11 +361,14 @@ public class MovieDetailsFragment extends Fragment {
                     video.setText(c.getString(IDX_VIDEO_NAME));
                     final String key = c.getString(IDX_VIDEO_KEY);
                     final String site = c.getString(IDX_VIDEO_SITE);
+                    if (mTrailerLink==null){
+                        mTrailerLink=YOUTUBE_BASE_URL + key;
+                    }
                     video.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if ("youtube".equalsIgnoreCase(site))
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + key)));
+                            if (YOUTUBE.equalsIgnoreCase(site))
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(YOUTUBE_BASE_URL + key)));
                             else
                                 Toast.makeText(getActivity(), "Sorry :( I cant' play video from " + site + ". Only youtube is supported now.", Toast.LENGTH_SHORT).show();
                         }
