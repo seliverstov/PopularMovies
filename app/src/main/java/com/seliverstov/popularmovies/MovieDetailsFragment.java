@@ -10,7 +10,9 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
@@ -44,6 +46,8 @@ public class MovieDetailsFragment extends Fragment {
 
     public static final String MOVIE_DETAILS_URI = "MOVIE_DETAILS_URI";
     public static final String YOUTUBE_BASE_URL = "http://www.youtube.com/watch?v=";
+    public static final String YOUTUBE_IMAGE_URL = "http://img.youtube.com/vi/%s/default.jpg";
+
     public static final String YOUTUBE = "youtube";
 
 
@@ -107,7 +111,7 @@ public class MovieDetailsFragment extends Fragment {
     private MenuItem mShareItem;
     private String mVideoUrl;
 
-    public Uri getMovieUri(){
+    public Uri getMovieUri() {
         return mUri;
     }
 
@@ -119,24 +123,24 @@ public class MovieDetailsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle arguments  = getArguments();
-        if (arguments!=null){
+        Bundle arguments = getArguments();
+        if (arguments != null) {
             mUri = arguments.getParcelable(MOVIE_DETAILS_URI);
         }
 
-        if (mUri==null) return null;
+        if (mUri == null) return null;
 
         final View view = inflater.inflate(R.layout.fragment_details, container, false);
 
-        mTitle = (TextView)view.findViewById(R.id.movie_title);
-        mYear = (TextView)view.findViewById(R.id.movie_year);
-        mRating = (TextView)view.findViewById(R.id.movie_rating);
-        mOverview = (TextView)view.findViewById(R.id.movie_overview);
-        mPoster = (ImageView)view.findViewById(R.id.movie_poster);
-        mFavorite = (ImageButton)view.findViewById(R.id.favorite);
+        mTitle = (TextView) view.findViewById(R.id.movie_title);
+        mYear = (TextView) view.findViewById(R.id.movie_year);
+        mRating = (TextView) view.findViewById(R.id.movie_rating);
+        mOverview = (TextView) view.findViewById(R.id.movie_overview);
+        mPoster = (ImageView) view.findViewById(R.id.movie_poster);
+        mFavorite = (ImageButton) view.findViewById(R.id.favorite);
 
-        mReviews = (LinearLayout)view.findViewById(R.id.movie_reviews);
-        mVideos = (LinearLayout)view.findViewById(R.id.movie_videos);
+        mReviews = (LinearLayout) view.findViewById(R.id.movie_reviews);
+        mVideos = (LinearLayout) view.findViewById(R.id.movie_videos);
 
         return view;
     }
@@ -153,7 +157,7 @@ public class MovieDetailsFragment extends Fragment {
         getLoaderManager().initLoader(TMDB_MOVIE_VIDEOS_LOADER, null, new TMDBVideosCallback()).forceLoad();
     }
 
-    public void onSortOrderChange(){
+    public void onSortOrderChange() {
 
     }
 
@@ -168,23 +172,23 @@ public class MovieDetailsFragment extends Fragment {
         ((ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem)).setShareIntent(intent);
     }
 
-    class CursorDetailsCallback implements LoaderManager.LoaderCallbacks<Cursor>{
+    class CursorDetailsCallback implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            if (mUri!=null)
-                return new CursorLoader(getActivity(),mUri, MOVIE_COLUMNS,null,null,null);
+            if (mUri != null)
+                return new CursorLoader(getActivity(), mUri, MOVIE_COLUMNS, null, null, null);
             else
                 return null;
         }
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
-            if (c.moveToFirst()){
+            if (c.moveToFirst()) {
                 String originalTitle = c.getString(IDX_ORIGINAL_TITLE);
                 mTitle.setText(originalTitle);
 
                 String rd = c.getString(IDX_RELEASE_DATE);
-                rd = (rd !=null && rd.length()>=4)? rd.substring(0,4): "";
+                rd = (rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "";
 
                 mYear.setText(rd);
 
@@ -193,7 +197,7 @@ public class MovieDetailsFragment extends Fragment {
                 mOverview.setText(c.getString(IDX_OVERVIEW));
 
                 String posterPath = c.getString(IDX_POSTER_PATH);
-                if (posterPath!=null) {
+                if (posterPath != null) {
                     Uri url = Uri.parse(getString(R.string.movie_poster_base_url))
                             .buildUpon()
                             .appendPath(getString(R.string.big_movie_poster_size))
@@ -201,18 +205,20 @@ public class MovieDetailsFragment extends Fragment {
                             .build();
                     Log.i(LOG_TAG, "Get poster for movie " + originalTitle + ": " + url.toString());
                     Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_big).into(mPoster);
-                }else{
+                } else {
                     mPoster.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     mPoster.setImageResource(R.drawable.noposter);
                 }
 
 
                 final int f = c.getInt(IDX_FAVORITE);
-                if (f == 0){
-                    mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_off));
-                }else{
-                    mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_on));
+
+                if (f == 0) {
+                    mFavorite.setImageDrawable(ContextCompat.getDrawable(getActivity(), android.R.drawable.btn_star_big_off));
+                } else {
+                    mFavorite.setImageDrawable(ContextCompat.getDrawable(getActivity(), android.R.drawable.btn_star_big_on));
                 }
+
                 final int id = c.getInt(IDX_ID);
                 mFavorite.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -220,10 +226,10 @@ public class MovieDetailsFragment extends Fragment {
                         ContentValues cv = new ContentValues();
                         if (f == 0) {
                             cv.put(MovieEntry.COLUMN_FAVORITE, 1);
-                            mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_on));
+                            mFavorite.setImageDrawable(ContextCompat.getDrawable(getActivity(),android.R.drawable.btn_star_big_on));
                         } else {
                             cv.put(MovieEntry.COLUMN_FAVORITE, (Integer) null);
-                            mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_off));
+                            mFavorite.setImageDrawable(ContextCompat.getDrawable(getActivity(),android.R.drawable.btn_star_big_off));
                         }
                         long u = getActivity().getContentResolver().update(MovieEntry.CONTENT_URI, cv, MovieEntry._ID + " = ?", new String[]{String.valueOf(id)});
                         Log.i(LOG_TAG, "Movie " + id + " was updated: " + u);
@@ -238,14 +244,14 @@ public class MovieDetailsFragment extends Fragment {
         }
     }
 
-    class TMDBReviewsCallback implements LoaderManager.LoaderCallbacks<Void>{
+    class TMDBReviewsCallback implements LoaderManager.LoaderCallbacks<Void> {
 
         @Override
         public Loader<Void> onCreateLoader(int id, Bundle args) {
-            if (mUri!=null) {
+            if (mUri != null) {
                 String movieId = String.valueOf(ContentUris.parseId(mUri));
                 return new ReviewsLoader(getActivity(), movieId);
-            }else
+            } else
                 return null;
         }
 
@@ -263,10 +269,10 @@ public class MovieDetailsFragment extends Fragment {
     private class CursorReviewsCallback implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            if (mUri!=null) {
+            if (mUri != null) {
                 long movieId = ContentUris.parseId(mUri);
-                return new CursorLoader(getActivity(), ReviewEntry.CONTENT_URI, REVIEW_COLUMNS, ReviewEntry.COLUMN_MOVIE_ID+" = ?", new String[]{String.valueOf(movieId)}, null);
-            }else
+                return new CursorLoader(getActivity(), ReviewEntry.CONTENT_URI, REVIEW_COLUMNS, ReviewEntry.COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(movieId)}, null);
+            } else
                 return null;
         }
 
@@ -289,47 +295,14 @@ public class MovieDetailsFragment extends Fragment {
         }
     }
 
-    private class ReviewAdapter extends CursorAdapter {
-        private class ViewHolder{
-            public TextView mAuthor;
-            public TextView mContent;
-            public TextView mUrl;
-
-            public ViewHolder(View view){
-                mAuthor = (TextView)view.findViewById(R.id.review_item_author);
-                mContent = (TextView)view.findViewById(R.id.review_item_content);
-                mUrl = (TextView)view.findViewById(R.id.review_item_url);
-            }
-        }
-        public ReviewAdapter(Context context, Cursor c, int flags) {
-            super(context, c, flags);
-        }
-
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            final View view = LayoutInflater.from(context).inflate(R.layout.review_item,parent,false);
-            ViewHolder vh = new ViewHolder(view);
-            view.setTag(vh);
-            return view;
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            ViewHolder vh = (ViewHolder)view.getTag();
-            vh.mAuthor.setText(cursor.getString(IDX_REVIEW_AUTHOR));
-            vh.mContent.setText(cursor.getString(IDX_REVIEW_CONTENT));
-            vh.mUrl.setText(cursor.getString(IDX_REVIEW_URL));
-        }
-    }
-
-    class TMDBVideosCallback implements LoaderManager.LoaderCallbacks<Void>{
+    class TMDBVideosCallback implements LoaderManager.LoaderCallbacks<Void> {
 
         @Override
         public Loader<Void> onCreateLoader(int id, Bundle args) {
-            if (mUri!=null) {
+            if (mUri != null) {
                 String movieId = String.valueOf(ContentUris.parseId(mUri));
                 return new VideosLoader(getActivity(), movieId);
-            }else
+            } else
                 return null;
         }
 
@@ -347,10 +320,10 @@ public class MovieDetailsFragment extends Fragment {
     private class CursorVideosCallback implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            if (mUri!=null) {
+            if (mUri != null) {
                 long movieId = ContentUris.parseId(mUri);
-                return new CursorLoader(getActivity(), VideoEntry.CONTENT_URI, VIDEO_COLUMNS, VideoEntry.COLUMN_MOVIE_ID+" = ?", new String[]{String.valueOf(movieId)}, null);
-            }else
+                return new CursorLoader(getActivity(), VideoEntry.CONTENT_URI, VIDEO_COLUMNS, VideoEntry.COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(movieId)}, null);
+            } else
                 return null;
         }
 
@@ -359,13 +332,15 @@ public class MovieDetailsFragment extends Fragment {
             if (c.moveToFirst()) {
                 do {
                     View v = getActivity().getLayoutInflater().inflate(R.layout.video_item, null);
-                    TextView video = (TextView) v.findViewById(R.id.video_item_name);
-                    video.setText(c.getString(IDX_VIDEO_NAME));
+                    ImageView video = (ImageView) v.findViewById(R.id.video_item_image);
                     final String key = c.getString(IDX_VIDEO_KEY);
                     final String site = c.getString(IDX_VIDEO_SITE);
+                    Uri url = Uri.parse(String.format(YOUTUBE_IMAGE_URL, key));
+                    Log.i(LOG_TAG, url.toString());
+                    Picasso.with(getActivity()).load(url).into(video);
                     if (c.isFirst()) {
-                        mVideoUrl = YOUTUBE_BASE_URL+key;
-                        if (mShareItem!=null){
+                        mVideoUrl = YOUTUBE_BASE_URL + key;
+                        if (mShareItem != null) {
                             Intent intent = new Intent(Intent.ACTION_SEND);
                             intent.setType("text/plain");
                             intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl);
@@ -389,34 +364,6 @@ public class MovieDetailsFragment extends Fragment {
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
             mVideos.removeAllViews();
-        }
-    }
-
-    private class VideoAdapter extends CursorAdapter {
-        private class ViewHolder{
-            public TextView mName;
-
-
-            public ViewHolder(View view){
-                mName = (TextView)view.findViewById(R.id.video_item_name);
-            }
-        }
-        public VideoAdapter(Context context, Cursor c, int flags) {
-            super(context, c, flags);
-        }
-
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            final View view = LayoutInflater.from(context).inflate(R.layout.video_item,parent,false);
-            ViewHolder vh = new ViewHolder(view);
-            view.setTag(vh);
-            return view;
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            ViewHolder vh = (ViewHolder)view.getTag();
-            vh.mName.setText(cursor.getString(IDX_VIDEO_NAME));
         }
     }
 }
