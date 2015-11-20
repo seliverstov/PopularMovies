@@ -42,10 +42,12 @@
                     android:textColor="@android:color/white"
                     android:id="@+id/movie_rating"
                     />
-                <Button
+                <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/favorite"/>
+                    android:id="@+id/favorite"
+                    android:background="@android:color/black"
+                    />
             </LinearLayout>
 
         </LinearLayout>

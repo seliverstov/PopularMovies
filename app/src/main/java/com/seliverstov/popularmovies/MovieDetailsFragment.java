@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -99,11 +100,12 @@ public class MovieDetailsFragment extends Fragment {
     private TextView mRating;
     private TextView mOverview;
     private ImageView mPoster;
-    private Button mFavorite;
+    private ImageButton mFavorite;
     private LinearLayout mReviews;
     private LinearLayout mVideos;
 
-    private String mTrailerLink;
+    private MenuItem mShareItem;
+    private String mVideoUrl;
 
     public Uri getMovieUri(){
         return mUri;
@@ -131,7 +133,7 @@ public class MovieDetailsFragment extends Fragment {
         mRating = (TextView)view.findViewById(R.id.movie_rating);
         mOverview = (TextView)view.findViewById(R.id.movie_overview);
         mPoster = (ImageView)view.findViewById(R.id.movie_poster);
-        mFavorite = (Button)view.findViewById(R.id.favorite);
+        mFavorite = (ImageButton)view.findViewById(R.id.favorite);
 
         mReviews = (LinearLayout)view.findViewById(R.id.movie_reviews);
         mVideos = (LinearLayout)view.findViewById(R.id.movie_videos);
@@ -157,13 +159,13 @@ public class MovieDetailsFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu,inflater);
-        inflater.inflate(R.menu.details_menu,menu);
-        MenuItem shareItem =  menu.findItem(R.id.action_share);
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.details_menu, menu);
+        mShareItem = menu.findItem(R.id.action_share);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT,mTrailerLink);
-        ((ShareActionProvider) MenuItemCompat.getActionProvider(shareItem)).setShareIntent(Intent.createChooser(intent,getString(R.string.share_trailer)));
+        intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl);
+        ((ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem)).setShareIntent(intent);
     }
 
     class CursorDetailsCallback implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -207,9 +209,9 @@ public class MovieDetailsFragment extends Fragment {
 
                 final int f = c.getInt(IDX_FAVORITE);
                 if (f == 0){
-                    mFavorite.setText("Add to Favorite");
+                    mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_off));
                 }else{
-                    mFavorite.setText("Remove from Favorite");
+                    mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_on));
                 }
                 final int id = c.getInt(IDX_ID);
                 mFavorite.setOnClickListener(new View.OnClickListener() {
@@ -218,10 +220,10 @@ public class MovieDetailsFragment extends Fragment {
                         ContentValues cv = new ContentValues();
                         if (f == 0) {
                             cv.put(MovieEntry.COLUMN_FAVORITE, 1);
-                            mFavorite.setText("Remove from Favorite");
+                            mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_on));
                         } else {
                             cv.put(MovieEntry.COLUMN_FAVORITE, (Integer) null);
-                            mFavorite.setText("Add to Favorite");
+                            mFavorite.setImageDrawable(getActivity().getDrawable(android.R.drawable.btn_star_big_off));
                         }
                         long u = getActivity().getContentResolver().update(MovieEntry.CONTENT_URI, cv, MovieEntry._ID + " = ?", new String[]{String.valueOf(id)});
                         Log.i(LOG_TAG, "Movie " + id + " was updated: " + u);
@@ -361,8 +363,14 @@ public class MovieDetailsFragment extends Fragment {
                     video.setText(c.getString(IDX_VIDEO_NAME));
                     final String key = c.getString(IDX_VIDEO_KEY);
                     final String site = c.getString(IDX_VIDEO_SITE);
-                    if (mTrailerLink==null){
-                        mTrailerLink=YOUTUBE_BASE_URL + key;
+                    if (c.isFirst()) {
+                        mVideoUrl = YOUTUBE_BASE_URL+key;
+                        if (mShareItem!=null){
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("text/plain");
+                            intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl);
+                            ((ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem)).setShareIntent(intent);
+                        }
                     }
                     video.setOnClickListener(new View.OnClickListener() {
                         @Override
