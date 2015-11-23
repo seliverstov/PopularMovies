@@ -21,6 +21,14 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     }
 
     @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        if (!db.isReadOnly()){
+            db.execSQL("PRAGMA foreign_keys=ON;");
+        }
+    }
+
+    @Override
     public void onCreate(SQLiteDatabase db) {
         final String SQL_CREATE_MOVIES_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
                 MovieEntry._ID + " INTEGER PRIMARY KEY," +
@@ -47,7 +55,7 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
                 ReviewEntry.COLUMN_CONTENT + " TEXT," +
                 ReviewEntry.COLUMN_URL + " TEXT," +
                 ReviewEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL," +
-                "FOREIGN KEY (" + ReviewEntry.COLUMN_MOVIE_ID + ") REFERENCES " + MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")," +
+                "FOREIGN KEY (" + ReviewEntry.COLUMN_MOVIE_ID + ") REFERENCES " + MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ") ON DELETE CASCADE," +
                 "UNIQUE ("+ReviewEntry.COLUMN_TMDB_ID+")"+
                 ")";
         final String SQL_CREATE_VIDEOS_TABLE = "CREATE TABLE " + VideoEntry.TABLE_NAME + " (" +
@@ -60,7 +68,7 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
                 VideoEntry.COLUMN_SIZE + " INTEGER," +
                 VideoEntry.COLUMN_TYPE + " TEXT," +
                 VideoEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL," +
-                "FOREIGN KEY (" + ReviewEntry.COLUMN_MOVIE_ID + ") REFERENCES " + MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")," +
+                "FOREIGN KEY (" + ReviewEntry.COLUMN_MOVIE_ID + ") REFERENCES " + MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")  ON DELETE CASCADE," +
                 "UNIQUE ("+VideoEntry.COLUMN_TMDB_ID+")"+
                 ")";
         final String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE "+ SettingEntry.TABLE_NAME + " ("+
