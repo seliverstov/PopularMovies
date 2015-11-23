@@ -6,4 +6,5 @@
     <dimen name="small_movie_poster_height">262px</dimen>
     <dimen name="big_movie_poster_width">342px</dimen>
     <dimen name="big_movie_poster_height">513px</dimen>
+    <dimen name="horizontal_line_height">2dp</dimen>
 </resources>

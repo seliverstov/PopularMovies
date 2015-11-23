@@ -194,7 +194,7 @@ public class MoviesGridFragment extends Fragment {
                     public void run() {
                         mGridView.setItemChecked(mGridView.getFirstVisiblePosition(),true);
                         Cursor c = (Cursor) mMoviesAdapter.getItem(mGridView.getFirstVisiblePosition());
-                        if (c != null) {
+                        if (c != null && c.getCount()>0) {
                             ItemSelectedCallback collback = (ItemSelectedCallback) getActivity();
                             collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
                         }

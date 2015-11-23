@@ -283,7 +283,6 @@ public class MovieDetailsFragment extends Fragment {
                     View r = getActivity().getLayoutInflater().inflate(R.layout.review_item, null);
                     ((TextView) r.findViewById(R.id.review_item_content)).setText(c.getString(IDX_REVIEW_CONTENT));
                     ((TextView) r.findViewById(R.id.review_item_author)).setText(c.getString(IDX_REVIEW_AUTHOR));
-                    ((TextView) r.findViewById(R.id.review_item_url)).setText(c.getString(IDX_REVIEW_URL));
                     mReviews.addView(r);
                 } while (c.moveToNext());
             }

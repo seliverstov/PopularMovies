@@ -3,23 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:background="@android:color/background_dark"
-    >
+    android:orientation="horizontal">
     <fragment
         class="com.seliverstov.popularmovies.MoviesGridFragment"
         tools:layout="@layout/fragment_grid"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:background="@android:color/background_dark"
         android:layout_weight="1"
-        android:id="@+id/grid_fragment"
-        />
+        android:id="@+id/grid_fragment"/>
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:id="@+id/details_fragment_container"/>
-
-
 </LinearLayout>

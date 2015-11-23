@@ -6,6 +6,6 @@
         android:layout_width="@dimen/small_movie_poster_width"
         android:layout_height="@dimen/small_movie_poster_width"
         android:scaleType="centerCrop"
-        android:layout_marginRight="5dp"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:id="@+id/video_item_image"/>
 </FrameLayout>

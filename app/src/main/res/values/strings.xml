@@ -30,4 +30,6 @@
     <string name="big_movie_poster_size">w342</string>
     <string name="action_share">Share</string>
     <string name="share_trailer">Share link to first trailer</string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
 </resources>
