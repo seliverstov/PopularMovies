@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Created by a.g.seliverstov on 06.11.2015.
  */
-public class MoviesLoader extends AsyncTaskLoader<Void> {
+public class MoviesLoader extends AsyncTaskLoader<List<Movie>> {
     private static final String LOG_TAG = MoviesLoader.class.getSimpleName();
 
     public MoviesLoader(Context context) {
@@ -24,7 +24,7 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
     }
 
     @Override
-    public Void loadInBackground() {
+    public List<Movie> loadInBackground() {
         try {
             SettingsManager settingsManager = new SettingsManager(getContext());
             String sortOrder = settingsManager.getSortOrderForWeb();
@@ -32,7 +32,7 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
             Log.i(LOG_TAG,"Start load in background with params: "+sortOrder+", "+page);
             List<Movie> movies = new TMDBClient().listMovies(sortOrder,page);
             int insCnt = 0;
-            if (movies.size()>0) {
+            if (movies!=null && movies.size()>0) {
                 ContentValues[] cvs = new ContentValues[movies.size()];
                 for (int i = 0; i < movies.size(); i++) {
                     ContentValues cv = new ContentValues();
@@ -58,10 +58,11 @@ public class MoviesLoader extends AsyncTaskLoader<Void> {
                 settingsManager.setCurrentPage(page);
             }
             Log.i(LOG_TAG, insCnt + " movies was loaded to database; page = " + page);
+            return movies;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Log.e(LOG_TAG,e.getMessage(),e);
+            return null;
         }
-        return null;
     }
 
 }

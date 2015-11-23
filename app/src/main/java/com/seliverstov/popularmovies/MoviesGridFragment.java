@@ -19,11 +19,15 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
 import com.seliverstov.popularmovies.loader.MoviesLoader;
 import com.seliverstov.popularmovies.model.SettingsManager;
+import com.seliverstov.popularmovies.rest.model.Movie;
+
+import java.util.List;
 
 
 /**
@@ -135,7 +139,7 @@ public class MoviesGridFragment extends Fragment {
             getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
     }
 
-    class MovieLoaderCallback implements LoaderManager.LoaderCallbacks<Void>{
+    class MovieLoaderCallback implements LoaderManager.LoaderCallbacks<List<Movie>>{
         private Context mContext;
 
         public MovieLoaderCallback(Context context){
@@ -143,17 +147,19 @@ public class MoviesGridFragment extends Fragment {
         }
 
         @Override
-        public Loader<Void> onCreateLoader(int id, Bundle args) {
+        public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
             return new MoviesLoader(mContext);
         }
 
         @Override
-        public void onLoadFinished(Loader<Void> loader, Void data) {
-
+        public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
+            if (data==null){
+                Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
-        public void onLoaderReset(Loader<Void> loader) {
+        public void onLoaderReset(Loader<List<Movie>> loader) {
 
         }
     };

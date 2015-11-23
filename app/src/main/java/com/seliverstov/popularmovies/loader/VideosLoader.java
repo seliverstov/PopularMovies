@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by a.g.seliverstov on 18.11.2015.
  */
-public class VideosLoader extends AsyncTaskLoader<Void> {
+public class VideosLoader extends AsyncTaskLoader<List<Video>> {
     private static final String LOG_TAG = ReviewsLoader.class.getSimpleName();
     private String mMovieId;
     public VideosLoader(Context context, String movieId) {
@@ -24,11 +24,11 @@ public class VideosLoader extends AsyncTaskLoader<Void> {
     }
 
     @Override
-    public Void loadInBackground() {
+    public List<Video> loadInBackground() {
         try{
             List<Video> videos = new TMDBClient().listVideos(mMovieId);
             int insCnt = 0;
-            if (videos.size()>0){
+            if (videos!=null  && videos.size()>0){
                 ContentValues[] cvs = new ContentValues[videos.size()];
                 for(int i=0;i<videos.size();i++){
                     ContentValues cv = new ContentValues();
@@ -47,9 +47,10 @@ public class VideosLoader extends AsyncTaskLoader<Void> {
                 insCnt = getContext().getContentResolver().bulkInsert(PopularMoviesContact.VideoEntry.CONTENT_URI,cvs);
             }
             Log.i(LOG_TAG, insCnt + " videos for movie "+mMovieId+" was loaded to database");
+            return videos;
         }catch(Exception e){
-            throw new RuntimeException(e);
+            Log.e(LOG_TAG,e.getMessage(),e);
+            return null;
         }
-        return null;
     }
 }

@@ -41,7 +41,7 @@ public class TMDBClient {
         Response<Movies> res = call.execute();
         Log.i(LOG_TAG,res.raw().request().urlString());
         Movies result = res.body();
-        return result.getResults();
+        return (result!=null)?result.getResults():null;
     }
 
     public List<Review> listReviews(String movieId)  throws IOException {
@@ -49,7 +49,7 @@ public class TMDBClient {
         Response<Reviews> res =  call.execute();
         Log.i(LOG_TAG,res.raw().request().urlString());
         Reviews result = res.body();
-        return result.getResults();
+        return (result!=null)?result.getResults():null;
     }
 
     public List<Video> listVideos(String movieId)  throws IOException {
@@ -57,6 +57,6 @@ public class TMDBClient {
         Response<Videos> res =  call.execute();
         Log.i(LOG_TAG,res.raw().request().urlString());
         Videos result = res.body();
-        return result.getResults();
+        return (result!=null)?result.getResults():null;
     }
 }

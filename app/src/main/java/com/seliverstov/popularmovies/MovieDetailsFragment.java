@@ -28,9 +28,12 @@ import android.widget.Toast;
 
 import com.seliverstov.popularmovies.loader.ReviewsLoader;
 import com.seliverstov.popularmovies.loader.VideosLoader;
+import com.seliverstov.popularmovies.rest.model.Review;
+import com.seliverstov.popularmovies.rest.model.Video;
 import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -234,10 +237,10 @@ public class MovieDetailsFragment extends Fragment {
         }
     }
 
-    class TMDBReviewsCallback implements LoaderManager.LoaderCallbacks<Void> {
+    class TMDBReviewsCallback implements LoaderManager.LoaderCallbacks<List<Review>> {
 
         @Override
-        public Loader<Void> onCreateLoader(int id, Bundle args) {
+        public Loader<List<Review>> onCreateLoader(int id, Bundle args) {
             if (mUri != null) {
                 String movieId = String.valueOf(ContentUris.parseId(mUri));
                 return new ReviewsLoader(getActivity(), movieId);
@@ -246,12 +249,14 @@ public class MovieDetailsFragment extends Fragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<Void> loader, Void data) {
-
+        public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
+            if (data==null){
+                Toast.makeText(getActivity(), getString(R.string.cant_load_reviews), Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
-        public void onLoaderReset(Loader<Void> loader) {
+        public void onLoaderReset(Loader<List<Review>> loader) {
 
         }
     }
@@ -286,10 +291,10 @@ public class MovieDetailsFragment extends Fragment {
         }
     }
 
-    class TMDBVideosCallback implements LoaderManager.LoaderCallbacks<Void> {
+    class TMDBVideosCallback implements LoaderManager.LoaderCallbacks<List<Video>> {
 
         @Override
-        public Loader<Void> onCreateLoader(int id, Bundle args) {
+        public Loader<List<Video>> onCreateLoader(int id, Bundle args) {
             if (mUri != null) {
                 String movieId = String.valueOf(ContentUris.parseId(mUri));
                 return new VideosLoader(getActivity(), movieId);
@@ -298,12 +303,14 @@ public class MovieDetailsFragment extends Fragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<Void> loader, Void data) {
-
+        public void onLoadFinished(Loader<List<Video>> loader, List<Video> data) {
+            if (data==null){
+                Toast.makeText(getActivity(), getString(R.string.cant_load_trailers), Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
-        public void onLoaderReset(Loader<Void> loader) {
+        public void onLoaderReset(Loader<List<Video>> loader) {
 
         }
     }

@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by a.g.seliverstov on 18.11.2015.
  */
-public class ReviewsLoader extends AsyncTaskLoader<Void> {
+public class ReviewsLoader extends AsyncTaskLoader<List<Review>> {
     private static final String LOG_TAG = ReviewsLoader.class.getSimpleName();
     private String mMovieId;
     public ReviewsLoader(Context context, String movieId) {
@@ -23,11 +23,11 @@ public class ReviewsLoader extends AsyncTaskLoader<Void> {
     }
 
     @Override
-    public Void loadInBackground() {
+    public List<Review> loadInBackground() {
         try{
             List<Review> reviews = new TMDBClient().listReviews(mMovieId);
             int insCnt = 0;
-            if (reviews.size()>0){
+            if (reviews!=null && reviews.size()>0){
                 ContentValues[] cvs = new ContentValues[reviews.size()];
                 for(int i=0;i<reviews.size();i++){
                     ContentValues cv = new ContentValues();
@@ -42,9 +42,10 @@ public class ReviewsLoader extends AsyncTaskLoader<Void> {
                 insCnt = getContext().getContentResolver().bulkInsert(PopularMoviesContact.ReviewEntry.CONTENT_URI,cvs);
             }
             Log.i(LOG_TAG, insCnt + " reviews for movie "+mMovieId+" was loaded to database");
+            return reviews;
         }catch(Exception e){
-            throw new RuntimeException(e);
+            Log.e(LOG_TAG,e.getMessage(),e);
+            return null;
         }
-        return null;
     }
 }
