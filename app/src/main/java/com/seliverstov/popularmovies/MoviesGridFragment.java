@@ -68,7 +68,7 @@ public class MoviesGridFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor c = (Cursor) mMoviesAdapter.getItem(position);
-                if (c != null) {
+                if (c != null && c.getCount() > 0) {
                     ItemSelectedCallback collback = (ItemSelectedCallback) getActivity();
                     collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
                 }

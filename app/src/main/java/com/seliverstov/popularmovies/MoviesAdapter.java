@@ -45,7 +45,7 @@ public class MoviesAdapter extends CursorAdapter {
                     .appendPath(context.getString(R.string.small_movie_poster_size))
                     .appendEncodedPath(poster)
                     .build();
-            Picasso.with(context).load(url).placeholder(R.drawable.loading_small).into((ImageView)view);
+            Picasso.with(context).load(url).placeholder(R.drawable.loading_small).error(R.drawable.noposter).into((ImageView)view);
         }else{
             ((ImageView)view).setScaleType(ImageView.ScaleType.CENTER_CROP);
             ((ImageView)view).setImageResource(R.drawable.noposter);
