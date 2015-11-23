@@ -71,17 +71,10 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (" + ReviewEntry.COLUMN_MOVIE_ID + ") REFERENCES " + MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + ")  ON DELETE CASCADE," +
                 "UNIQUE ("+VideoEntry.COLUMN_TMDB_ID+")"+
                 ")";
-        final String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE "+ SettingEntry.TABLE_NAME + " ("+
-                SettingEntry._ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +
-                SettingEntry.COLUMN_NAME+" TEXT NOT NULL,"+
-                SettingEntry.COLUMN_VALUE+" TEXT,"+
-                "UNIQUE ("+ SettingEntry.COLUMN_NAME+")"+
-                ")";
 
         db.execSQL(SQL_CREATE_MOVIES_TABLE);
         db.execSQL(SQL_CREATE_REVIEWS_TABLE);
         db.execSQL(SQL_CREATE_VIDEOS_TABLE);
-        db.execSQL(SQL_CREATE_SETTINGS_TABLE);
         Log.i(LOG_TAG, "Database created!");
     }
 
@@ -90,7 +83,6 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + ReviewEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + VideoEntry.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS "+ SettingEntry.TABLE_NAME);
         onCreate(db);
         Log.i(LOG_TAG, "Database upgraded!");
     }

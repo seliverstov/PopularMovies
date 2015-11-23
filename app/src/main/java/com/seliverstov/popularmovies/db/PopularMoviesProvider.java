@@ -30,10 +30,6 @@ public class PopularMoviesProvider extends ContentProvider {
     static final int VIDEO = 300;
     static final int VIDEO_WITH_ID = 301;
 
-    static final int SETTING = 400;
-    static final int SETTING_WITH_ID = 401;
-    static final int SETTING_WITH_NAME = 402;
-
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = CONTENT_AUTHORITY;
@@ -45,11 +41,6 @@ public class PopularMoviesProvider extends ContentProvider {
 
         sUriMatcher.addURI(authority, PATH_VIDEO, VIDEO);
         sUriMatcher.addURI(authority, PATH_VIDEO+"/#", VIDEO_WITH_ID);
-
-        sUriMatcher.addURI(authority, PATH_SETTING, SETTING);
-        sUriMatcher.addURI(authority, PATH_SETTING+"/#", SETTING_WITH_ID);
-        sUriMatcher.addURI(authority, PATH_SETTING +"/*", SETTING_WITH_NAME);
-
     }
 
     private PopularMoviesDbHelper mDbHelper;
@@ -85,16 +76,6 @@ public class PopularMoviesProvider extends ContentProvider {
                 retCursor = db.query(VideoEntry.TABLE_NAME,projection,selection,selectionArgs,null,null,sortOrder);
                 break;
             }
-            case SETTING:
-            case SETTING_WITH_ID: {
-                retCursor = db.query(SettingEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-                break;
-            }
-            case SETTING_WITH_NAME:{
-                String name = uri.getPathSegments().get(1);
-                retCursor = db.query(SettingEntry.TABLE_NAME,projection, SettingEntry.COLUMN_NAME+" = ?",new String[]{name},null,null,sortOrder);
-                break;
-            }
             default:
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
@@ -118,11 +99,6 @@ public class PopularMoviesProvider extends ContentProvider {
                 return VideoEntry.CONTENT_DIR_TYPE;
             case VIDEO_WITH_ID:
                 return VideoEntry.CONTENT_ITEM_TYPE;
-            case SETTING:
-                return SettingEntry.CONTENT_DIR_TYPE;
-            case SETTING_WITH_ID:
-            case SETTING_WITH_NAME:
-                return SettingEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
@@ -159,14 +135,6 @@ public class PopularMoviesProvider extends ContentProvider {
                     throw new UnsupportedOperationException("Failed to insert row into " + uri);
                 break;
             }
-            case SETTING: {
-                long id = db.insertWithOnConflict(SettingEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_NONE);
-                if (id != -1)
-                    returnUri = ContentUris.withAppendedId(SettingEntry.CONTENT_URI, id);
-                else
-                    throw new UnsupportedOperationException("Failed to insert row into " + uri);
-                break;
-            }
             default:
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
@@ -191,10 +159,6 @@ public class PopularMoviesProvider extends ContentProvider {
             }
             case VIDEO: {
                 deletedRows = db.delete(VideoEntry.TABLE_NAME, selection, selectionArgs);
-                break;
-            }
-            case SETTING: {
-                deletedRows = db.delete(SettingEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             default:
@@ -225,10 +189,6 @@ public class PopularMoviesProvider extends ContentProvider {
                 updatedRows = db.update(VideoEntry.TABLE_NAME,values,selection,selectionArgs);
                 break;
             }
-            case SETTING: {
-                updatedRows = db.update(SettingEntry.TABLE_NAME,values,selection,selectionArgs);
-                break;
-            }
             default:
                 throw new UnsupportedOperationException("Unsupported uri: "+uri);
         }
@@ -252,9 +212,6 @@ public class PopularMoviesProvider extends ContentProvider {
                 break;
             case VIDEO:
                 table = VideoEntry.TABLE_NAME;
-                break;
-            case SETTING:
-                table = SettingEntry.TABLE_NAME;
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported uri:" + uri);
