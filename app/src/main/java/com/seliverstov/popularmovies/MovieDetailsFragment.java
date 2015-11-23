@@ -36,6 +36,9 @@ import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 import static com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 
 /**
@@ -99,14 +102,14 @@ public class MovieDetailsFragment extends Fragment {
     private static int IDX_VIDEO_KEY = 3;
 
     private Uri mUri;
-    private TextView mTitle;
-    private TextView mYear;
-    private TextView mRating;
-    private TextView mOverview;
-    private ImageView mPoster;
-    private ImageButton mFavorite;
-    private LinearLayout mReviews;
-    private LinearLayout mVideos;
+    @Bind(R.id.movie_title) TextView mTitle;
+    @Bind(R.id.movie_year) TextView mYear;
+    @Bind(R.id.movie_rating) TextView mRating;
+    @Bind(R.id.movie_overview) TextView mOverview;
+    @Bind(R.id.movie_poster) ImageView mPoster;
+    @Bind(R.id.favorite) ImageButton mFavorite;
+    @Bind(R.id.movie_reviews) LinearLayout mReviews;
+    @Bind(R.id.movie_videos) LinearLayout mVideos;
 
     private MenuItem mShareItem;
     private String mVideoUrl;
@@ -127,20 +130,10 @@ public class MovieDetailsFragment extends Fragment {
         if (arguments != null) {
             mUri = arguments.getParcelable(MOVIE_DETAILS_URI);
         }
-
         if (mUri == null) return null;
 
         final View view = inflater.inflate(R.layout.fragment_details, container, false);
-
-        mTitle = (TextView) view.findViewById(R.id.movie_title);
-        mYear = (TextView) view.findViewById(R.id.movie_year);
-        mRating = (TextView) view.findViewById(R.id.movie_rating);
-        mOverview = (TextView) view.findViewById(R.id.movie_overview);
-        mPoster = (ImageView) view.findViewById(R.id.movie_poster);
-        mFavorite = (ImageButton) view.findViewById(R.id.favorite);
-
-        mReviews = (LinearLayout) view.findViewById(R.id.movie_reviews);
-        mVideos = (LinearLayout) view.findViewById(R.id.movie_videos);
+        ButterKnife.bind(this,view);
 
         return view;
     }
