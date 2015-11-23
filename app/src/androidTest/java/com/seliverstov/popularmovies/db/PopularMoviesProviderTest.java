@@ -79,11 +79,6 @@ public class PopularMoviesProviderTest extends AndroidTestCase {
         testBulkInsert(VideoEntry.CONTENT_URI,TestUtils.getSampleVideos(100));
     }
 
-    public void testSettingQuries(){
-        testBasicQueries(SettingEntry.CONTENT_URI,TestUtils.getSampleSettingData(), SettingEntry.COLUMN_VALUE);
-        testBulkInsert(SettingEntry.CONTENT_URI,TestUtils.getSampleSettings(100));
-    }
-
     protected void testBulkInsert(Uri contentUri, ContentValues[] values){
         TestUtils.TestContentObserver tco = TestUtils.TestContentObserver.newInstance();
         mContext.getContentResolver().registerContentObserver(contentUri, true, tco);

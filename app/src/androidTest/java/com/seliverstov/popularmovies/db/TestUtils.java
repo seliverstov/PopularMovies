@@ -72,17 +72,6 @@ public class TestUtils {
         return row;
     }
 
-    public static ContentValues getSampleSettingData() {
-        return getSampleSettingData(null);
-    }
-
-    public static ContentValues getSampleSettingData(Integer id){
-        ContentValues row = new ContentValues();
-        row.put(PopularMoviesContact.SettingEntry.COLUMN_NAME,(id==null)?"PAGE":String.valueOf(id));
-        row.put(PopularMoviesContact.SettingEntry.COLUMN_VALUE,"1");
-        return row;
-    }
-
     public static void validateRecord(Cursor c, ContentValues row) {
         Set<Map.Entry<String, Object>> vs = row.valueSet();
         for(Map.Entry<String, Object> e:vs){
@@ -123,14 +112,6 @@ public class TestUtils {
         ContentValues[] values = new ContentValues[count];
         for(int i=0;i<count;i++){
             values[i]=getSampleVideoData(i);
-        }
-        return values;
-    }
-
-    public static ContentValues[] getSampleSettings(int count) {
-        ContentValues[] values = new ContentValues[count];
-        for(int i=0;i<count;i++){
-            values[i]=getSampleSettingData(i);
         }
         return values;
     }
