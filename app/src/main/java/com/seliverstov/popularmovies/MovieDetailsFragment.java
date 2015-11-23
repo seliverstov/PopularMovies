@@ -292,6 +292,7 @@ public class MovieDetailsFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
             if (c.moveToFirst()) {
+                mReviews.removeAllViews();
                 do {
                     View r = getActivity().getLayoutInflater().inflate(R.layout.review_item, null);
                     ((TextView) r.findViewById(R.id.review_item_content)).setText(c.getString(IDX_REVIEW_CONTENT));
@@ -363,6 +364,7 @@ public class MovieDetailsFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
             if (c.moveToFirst()) {
+                mVideos.removeAllViews();
                 do {
                     View v = getActivity().getLayoutInflater().inflate(R.layout.video_item, null);
                     ImageView video = (ImageView) v.findViewById(R.id.video_item_image);
