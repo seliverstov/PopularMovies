@@ -160,40 +160,4 @@ public class PopularMoviesDbHelperTest extends AndroidTestCase  {
         c.close();
         db.close();
     }
-
-    public void tesSettingTable(){
-        SQLiteDatabase db = (new PopularMoviesDbHelper(mContext)).getWritableDatabase();
-        Cursor c = db.rawQuery("PRAGMA table_info("+ SettingEntry.TABLE_NAME+")",null);
-        assertTrue(c.moveToFirst());
-
-        HashSet columns = new HashSet();
-        columns.add(SettingEntry._ID);
-
-
-        int columnIndex = c.getColumnIndex("name");
-
-        do{
-            columns.remove(c.getString(columnIndex));
-        }while(c.moveToNext());
-        c.close();
-
-        assertTrue(columns.isEmpty());
-
-        ContentValues row = TestUtils.getSampleSettingData();
-
-        long rowId = db.insert(SettingEntry.TABLE_NAME,null,row);
-
-        assertTrue(rowId != -1);
-
-        c = db.query(SettingEntry.TABLE_NAME,null,null,null,null,null,null);
-
-        assertTrue(c.moveToFirst());
-
-        TestUtils.validateRecord(c, row);
-
-        assertFalse(c.moveToNext());
-        c.close();
-        db.close();
-    }
-
 }
