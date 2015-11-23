@@ -114,6 +114,8 @@ public class MovieDetailsFragment extends Fragment {
     @Bind(R.id.movie_videos) LinearLayout mVideos;
     @Bind(R.id.movie_videos_progressbar) ProgressBar mVideosProgressBar;
     @Bind(R.id.movie_reviews_progressbar) ProgressBar mReviewsProgressBar;
+    @Bind(R.id.movie_has_no_videos) TextView mNoVideos;
+    @Bind(R.id.movie_has_no_reviews) TextView mNoReviews;
 
     private MenuItem mShareItem;
     private String mVideoUrl;
@@ -261,6 +263,11 @@ public class MovieDetailsFragment extends Fragment {
                     mReviewsProgressBar.setVisibility(View.GONE);
                 }
             });
+            if (data!=null && data.size()==0){
+                mNoReviews.setVisibility(View.VISIBLE);
+            }else{
+                mNoReviews.setVisibility(View.GONE);
+            }
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_reviews), Toast.LENGTH_SHORT).show();
             }
@@ -327,6 +334,11 @@ public class MovieDetailsFragment extends Fragment {
                     mVideosProgressBar.setVisibility(View.GONE);
                 }
             });
+            if (data!=null && data.size()==0){
+                mNoVideos.setVisibility(View.VISIBLE);
+            }else{
+                mNoVideos.setVisibility(View.GONE);
+            }
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_trailers), Toast.LENGTH_SHORT).show();
             }

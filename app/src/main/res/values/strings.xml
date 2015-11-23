@@ -35,5 +35,7 @@
     <string name="trailers">Trailers</string>
     <string name="reviews">Reviews</string>
     <string name="no_youtube_video">Sorry :( I can\'t play video from %s site. Only youtube is supported now.</string>
+    <string name="no_reviews">No reviews</string>
+    <string name="no_videos">No trailers</string>
 
 </resources>
