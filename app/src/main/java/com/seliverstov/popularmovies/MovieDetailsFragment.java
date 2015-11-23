@@ -4,13 +4,11 @@ import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -22,8 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -113,6 +109,7 @@ public class MovieDetailsFragment extends Fragment {
 
     private MenuItem mShareItem;
     private String mVideoUrl;
+    private final String INTENT_TYPE = "text/plain";
 
     public Uri getMovieUri() {
         return mUri;
@@ -143,11 +140,11 @@ public class MovieDetailsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(CURSOR_MOVIE_DETAILS_LOADER, null, new CursorDetailsCallback());
 
-        getLoaderManager().initLoader(CURSOR_MOVIE_REVIEWS_LOADER, null, new CursorReviewsCallback()).forceLoad();
-        getLoaderManager().initLoader(TMDB_MOVIE_REVIEWS_LOADER, null, new TMDBReviewsCallback()).forceLoad();
+        getLoaderManager().initLoader(CURSOR_MOVIE_REVIEWS_LOADER, null, new CursorReviewsCallback());
+        getLoaderManager().initLoader(TMDB_MOVIE_REVIEWS_LOADER, null, new TMDBReviewsCallback());
 
-        getLoaderManager().initLoader(CURSOR_MOVIE_VIDEOS_LOADER, null, new CursorVideosCallback()).forceLoad();
-        getLoaderManager().initLoader(TMDB_MOVIE_VIDEOS_LOADER, null, new TMDBVideosCallback()).forceLoad();
+        getLoaderManager().initLoader(CURSOR_MOVIE_VIDEOS_LOADER, null, new CursorVideosCallback());
+        getLoaderManager().initLoader(TMDB_MOVIE_VIDEOS_LOADER, null, new TMDBVideosCallback());
     }
 
     public void onSortOrderChange() {
@@ -160,7 +157,7 @@ public class MovieDetailsFragment extends Fragment {
         inflater.inflate(R.menu.details_menu, menu);
         mShareItem = menu.findItem(R.id.action_share);
         Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
+        intent.setType(INTENT_TYPE);
         intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl);
         ((ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem)).setShareIntent(intent);
     }
@@ -278,6 +275,8 @@ public class MovieDetailsFragment extends Fragment {
                     ((TextView) r.findViewById(R.id.review_item_author)).setText(c.getString(IDX_REVIEW_AUTHOR));
                     mReviews.addView(r);
                 } while (c.moveToNext());
+            }else{
+                getLoaderManager().getLoader(TMDB_MOVIE_REVIEWS_LOADER).forceLoad();
             }
         }
 
@@ -329,12 +328,12 @@ public class MovieDetailsFragment extends Fragment {
                     final String site = c.getString(IDX_VIDEO_SITE);
                     Uri url = Uri.parse(String.format(YOUTUBE_IMAGE_URL, key));
                     Log.i(LOG_TAG, url.toString());
-                    Picasso.with(getActivity()).load(url).into(video);
+                    Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_small).error(R.drawable.noposter).into(video);
                     if (c.isFirst()) {
                         mVideoUrl = YOUTUBE_BASE_URL + key;
                         if (mShareItem != null) {
                             Intent intent = new Intent(Intent.ACTION_SEND);
-                            intent.setType("text/plain");
+                            intent.setType(INTENT_TYPE);
                             intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl);
                             ((ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem)).setShareIntent(intent);
                         }
@@ -345,11 +344,13 @@ public class MovieDetailsFragment extends Fragment {
                             if (YOUTUBE.equalsIgnoreCase(site))
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(YOUTUBE_BASE_URL + key)));
                             else
-                                Toast.makeText(getActivity(), "Sorry :( I cant' play video from " + site + ". Only youtube is supported now.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), String.format(getString(R.string.no_youtube_video),site), Toast.LENGTH_SHORT).show();
                         }
                     });
                     mVideos.addView(v);
                 } while (c.moveToNext());
+            }else{
+                getLoaderManager().getLoader(TMDB_MOVIE_VIDEOS_LOADER).forceLoad();
             }
         }
 
