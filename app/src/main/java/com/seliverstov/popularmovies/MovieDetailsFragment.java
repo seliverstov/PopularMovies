@@ -10,6 +10,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
@@ -23,9 +24,11 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.loader.ReviewsLoader;
 import com.seliverstov.popularmovies.loader.VideosLoader;
 import com.seliverstov.popularmovies.rest.model.Review;
@@ -109,6 +112,8 @@ public class MovieDetailsFragment extends Fragment {
     @Bind(R.id.favorite) ImageButton mFavorite;
     @Bind(R.id.movie_reviews) LinearLayout mReviews;
     @Bind(R.id.movie_videos) LinearLayout mVideos;
+    @Bind(R.id.movie_videos_progressbar) ProgressBar mVideosProgressBar;
+    @Bind(R.id.movie_reviews_progressbar) ProgressBar mReviewsProgressBar;
 
     private MenuItem mShareItem;
     private String mVideoUrl;
@@ -250,6 +255,12 @@ public class MovieDetailsFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mReviewsProgressBar.setVisibility(View.GONE);
+                }
+            });
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_reviews), Toast.LENGTH_SHORT).show();
             }
@@ -281,6 +292,12 @@ public class MovieDetailsFragment extends Fragment {
                     mReviews.addView(r);
                 } while (c.moveToNext());
             }else{
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mReviewsProgressBar.setVisibility(View.VISIBLE);
+                    }
+                });
                 getLoaderManager().getLoader(TMDB_MOVIE_REVIEWS_LOADER).forceLoad();
             }
         }
@@ -304,6 +321,12 @@ public class MovieDetailsFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<Video>> loader, List<Video> data) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mVideosProgressBar.setVisibility(View.GONE);
+                }
+            });
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_trailers), Toast.LENGTH_SHORT).show();
             }
@@ -357,6 +380,12 @@ public class MovieDetailsFragment extends Fragment {
                     mVideos.addView(v);
                 } while (c.moveToNext());
             }else{
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mVideosProgressBar.setVisibility(View.VISIBLE);
+                    }
+                });
                 getLoaderManager().getLoader(TMDB_MOVIE_VIDEOS_LOADER).forceLoad();
             }
         }

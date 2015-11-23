@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
@@ -28,6 +29,9 @@ import com.seliverstov.popularmovies.model.SettingsManager;
 import com.seliverstov.popularmovies.rest.model.Movie;
 
 import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 
 /**
@@ -52,7 +56,8 @@ public class MoviesGridFragment extends Fragment {
 
     public static int IDX_ID = 0;
     public static int IDX_POSTER_PATH = 1;
-    private GridView mGridView;
+    @Bind(R.id.movies_grid) GridView mGridView;
+    @Bind(R.id.movies_grid_progressbar) ProgressBar mProgressBar;
 
     public interface ItemSelectedCallback{
         void onItemSelected(Uri uri);
@@ -66,7 +71,7 @@ public class MoviesGridFragment extends Fragment {
 
         mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
-        mGridView = (GridView) view.findViewById(R.id.movies_grid);
+        ButterKnife.bind(this,view);
 
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -127,6 +132,7 @@ public class MoviesGridFragment extends Fragment {
 
         long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
         if (count == 0){
+            mProgressBar.setVisibility(View.VISIBLE);
             getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
         }
     }
@@ -136,6 +142,7 @@ public class MoviesGridFragment extends Fragment {
 
         SettingsManager settingsManager = new SettingsManager(getActivity());
         if (!settingsManager.isFavoriteSortOrder())
+            mProgressBar.setVisibility(View.VISIBLE);
             getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
     }
 
@@ -153,6 +160,12 @@ public class MoviesGridFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
+            new Handler().post(new Runnable(){
+                @Override
+                public void run() {
+                    mProgressBar.setVisibility(View.GONE);
+                }
+            });
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
             }
