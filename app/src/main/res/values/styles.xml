@@ -5,5 +5,5 @@
         <item name="android:background">@android:color/black</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
-    <style name="MoviesGrid" parent="AppTheme"/>
+
 </resources>

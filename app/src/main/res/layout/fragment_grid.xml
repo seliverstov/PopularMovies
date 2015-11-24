@@ -17,6 +17,5 @@
         android:verticalSpacing="@dimen/activity_vertical_margin"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
-        android:columnWidth="@dimen/small_movie_poster_width"
-        android:gravity="center" style="@style/MoviesGrid"/>
+        android:columnWidth="@dimen/small_movie_poster_width"/>
 </LinearLayout>
