@@ -107,7 +107,7 @@ public class MoviesGridFragment extends Fragment {
                     previousTotalItemCount = totalItemCount;
                     Log.i(LOG_TAG, "Load on scroll is finished");
                 }
-                if (!settingsManager.isFavoriteSortOrder()) {
+                if (!settingsManager.isFavoriteSortOrder() && LoaderUtils.isNetworkAvailable(getActivity())) {
                     if (!loading) {
                         if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                             loading = true;
@@ -173,6 +173,7 @@ public class MoviesGridFragment extends Fragment {
             Log.i(LOG_TAG,"onLoadFinished with result "+data);
             mProgressBar.setVisibility(View.GONE);
             if (data==null){
+                loading=false;
                 Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
             }
         }
