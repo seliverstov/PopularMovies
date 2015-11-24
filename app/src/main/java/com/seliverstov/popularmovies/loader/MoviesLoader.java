@@ -25,6 +25,7 @@ public class MoviesLoader extends AsyncTaskLoader<List<Movie>> {
 
     @Override
     public List<Movie> loadInBackground() {
+        if (!LoaderUtils.isNetworkAvailable(getContext())) return null;
         try {
             SettingsManager settingsManager = new SettingsManager(getContext());
             String sortOrder = settingsManager.getSortOrderForWeb();

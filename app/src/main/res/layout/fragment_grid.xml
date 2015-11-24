@@ -18,6 +18,5 @@
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
         android:columnWidth="@dimen/small_movie_poster_width"
-        android:gravity="center"
-        android:choiceMode="singleChoice"/>
+        android:gravity="center" style="@style/MoviesGrid"/>
 </LinearLayout>

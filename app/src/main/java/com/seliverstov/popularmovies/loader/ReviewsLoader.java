@@ -24,6 +24,7 @@ public class ReviewsLoader extends AsyncTaskLoader<List<Review>> {
 
     @Override
     public List<Review> loadInBackground() {
+        if (!LoaderUtils.isNetworkAvailable(getContext())) return null;
         try{
             List<Review> reviews = new TMDBClient().listReviews(mMovieId);
             int insCnt = 0;

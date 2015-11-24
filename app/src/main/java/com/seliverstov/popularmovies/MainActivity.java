@@ -99,10 +99,6 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
     @Override
     public void onItemSelected(Uri uri) {
-        if (mMovieUri == null && !mTwoPane) {
-            mMovieUri = uri;
-            return;
-        }
         mMovieUri = uri;
         if (mTwoPane){
             Bundle argumants = new Bundle();

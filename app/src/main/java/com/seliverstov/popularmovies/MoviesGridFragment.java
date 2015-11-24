@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
+import com.seliverstov.popularmovies.loader.LoaderUtils;
 import com.seliverstov.popularmovies.loader.MoviesLoader;
 import com.seliverstov.popularmovies.model.SettingsManager;
 import com.seliverstov.popularmovies.rest.model.Movie;
@@ -129,9 +130,9 @@ public class MoviesGridFragment extends Fragment {
         getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity()));
 
         getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity()));
-
+        SettingsManager settingsManager = new SettingsManager(getActivity());
         long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
-        if (count == 0){
+        if (count == 0 && !settingsManager.isFavoriteSortOrder()){
             mProgressBar.setVisibility(View.VISIBLE);
             getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
         }
@@ -139,12 +140,18 @@ public class MoviesGridFragment extends Fragment {
 
     void onSortOrderChanged(){
         mGridView.clearChoices();
+
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();
 
         SettingsManager settingsManager = new SettingsManager(getActivity());
-        if (!settingsManager.isFavoriteSortOrder())
-            mProgressBar.setVisibility(View.VISIBLE);
-            getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
+        if (!settingsManager.isFavoriteSortOrder()) {
+            if (LoaderUtils.isNetworkAvailable(getActivity())){
+                mProgressBar.setVisibility(View.VISIBLE);
+                getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
+            }else{
+                Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     class MovieLoaderCallback implements LoaderManager.LoaderCallbacks<List<Movie>>{
@@ -160,16 +167,18 @@ public class MoviesGridFragment extends Fragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
+        public void onLoadFinished(Loader<List<Movie>> loader, final List<Movie> data) {
+            Log.i(LOG_TAG,"onLoadFinished with result "+data);
             new Handler().post(new Runnable(){
                 @Override
                 public void run() {
                     mProgressBar.setVisibility(View.GONE);
+                    if (data==null){
+                        Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
-            if (data==null){
-                Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
-            }
+
         }
 
         @Override
@@ -208,19 +217,6 @@ public class MoviesGridFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             mMoviesAdapter.swapCursor(data);
-            if (mGridView.getCheckedItemPosition()==GridView.INVALID_POSITION){
-                new Handler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mGridView.setItemChecked(mGridView.getFirstVisiblePosition(),true);
-                        Cursor c = (Cursor) mMoviesAdapter.getItem(mGridView.getFirstVisiblePosition());
-                        if (c != null && c.getCount()>0) {
-                            ItemSelectedCallback collback = (ItemSelectedCallback) getActivity();
-                            collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
-                        }
-                    }
-                });
-            }
         }
 
         @Override

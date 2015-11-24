@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.loader.ReviewsLoader;
 import com.seliverstov.popularmovies.loader.VideosLoader;
+import com.seliverstov.popularmovies.model.SettingsManager;
 import com.seliverstov.popularmovies.rest.model.Review;
 import com.seliverstov.popularmovies.rest.model.Video;
 import com.squareup.picasso.Picasso;
@@ -140,7 +141,7 @@ public class MovieDetailsFragment extends Fragment {
         if (mUri == null) return null;
 
         final View view = inflater.inflate(R.layout.fragment_details, container, false);
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
 
         return view;
     }
@@ -155,10 +156,6 @@ public class MovieDetailsFragment extends Fragment {
 
         getLoaderManager().initLoader(CURSOR_MOVIE_VIDEOS_LOADER, null, new CursorVideosCallback());
         getLoaderManager().initLoader(TMDB_MOVIE_VIDEOS_LOADER, null, new TMDBVideosCallback());
-    }
-
-    public void onSortOrderChange() {
-
     }
 
     @Override
@@ -256,18 +253,8 @@ public class MovieDetailsFragment extends Fragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    mReviewsProgressBar.setVisibility(View.GONE);
-                }
-            });
-            if (data!=null && data.size()==0){
-                mNoReviews.setVisibility(View.VISIBLE);
-            }else{
-                mNoReviews.setVisibility(View.GONE);
-            }
+        public void onLoadFinished(Loader<List<Review>> loader, final List<Review> data) {
+            mReviewsProgressBar.setVisibility(View.GONE);
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_reviews), Toast.LENGTH_SHORT).show();
             }
@@ -292,6 +279,7 @@ public class MovieDetailsFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
             if (c.moveToFirst()) {
+                mNoReviews.setVisibility(View.GONE);
                 mReviews.removeAllViews();
                 do {
                     View r = getActivity().getLayoutInflater().inflate(R.layout.review_item, null);
@@ -300,13 +288,11 @@ public class MovieDetailsFragment extends Fragment {
                     mReviews.addView(r);
                 } while (c.moveToNext());
             }else{
-                new Handler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mReviewsProgressBar.setVisibility(View.VISIBLE);
-                    }
-                });
-                getLoaderManager().getLoader(TMDB_MOVIE_REVIEWS_LOADER).forceLoad();
+                mNoReviews.setVisibility(View.VISIBLE);
+                if (!new SettingsManager(getActivity()).isFavoriteSortOrder()) {
+                    mReviewsProgressBar.setVisibility(View.VISIBLE);
+                    getLoaderManager().getLoader(TMDB_MOVIE_REVIEWS_LOADER).forceLoad();
+                }
             }
         }
 
@@ -328,18 +314,8 @@ public class MovieDetailsFragment extends Fragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<List<Video>> loader, List<Video> data) {
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    mVideosProgressBar.setVisibility(View.GONE);
-                }
-            });
-            if (data!=null && data.size()==0){
-                mNoVideos.setVisibility(View.VISIBLE);
-            }else{
-                mNoVideos.setVisibility(View.GONE);
-            }
+        public void onLoadFinished(Loader<List<Video>> loader,final List<Video> data) {
+            mVideosProgressBar.setVisibility(View.GONE);
             if (data==null){
                 Toast.makeText(getActivity(), getString(R.string.cant_load_trailers), Toast.LENGTH_SHORT).show();
             }
@@ -364,6 +340,7 @@ public class MovieDetailsFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
             if (c.moveToFirst()) {
+                mNoVideos.setVisibility(View.GONE);
                 mVideos.removeAllViews();
                 do {
                     View v = getActivity().getLayoutInflater().inflate(R.layout.video_item, null);
@@ -394,13 +371,11 @@ public class MovieDetailsFragment extends Fragment {
                     mVideos.addView(v);
                 } while (c.moveToNext());
             }else{
-                new Handler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideosProgressBar.setVisibility(View.VISIBLE);
-                    }
-                });
-                getLoaderManager().getLoader(TMDB_MOVIE_VIDEOS_LOADER).forceLoad();
+                mNoVideos.setVisibility(View.VISIBLE);
+                if (!new SettingsManager(getActivity()).isFavoriteSortOrder()){
+                    mVideosProgressBar.setVisibility(View.VISIBLE);
+                    getLoaderManager().getLoader(TMDB_MOVIE_VIDEOS_LOADER).forceLoad();
+                }
             }
         }
 

@@ -25,6 +25,7 @@ public class VideosLoader extends AsyncTaskLoader<List<Video>> {
 
     @Override
     public List<Video> loadInBackground() {
+        if (!LoaderUtils.isNetworkAvailable(getContext())) return null;
         try{
             List<Video> videos = new TMDBClient().listVideos(mMovieId);
             int insCnt = 0;
