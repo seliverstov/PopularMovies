@@ -10,7 +10,6 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
@@ -28,7 +27,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.loader.ReviewsLoader;
 import com.seliverstov.popularmovies.loader.VideosLoader;
 import com.seliverstov.popularmovies.model.SettingsManager;
@@ -138,11 +136,13 @@ public class MovieDetailsFragment extends Fragment {
         if (arguments != null) {
             mUri = arguments.getParcelable(MOVIE_DETAILS_URI);
         }
-        if (mUri == null) return null;
-
-        final View view = inflater.inflate(R.layout.fragment_details, container, false);
-        ButterKnife.bind(this, view);
-
+        View view;
+        if (mUri == null) {
+            view = inflater.inflate(R.layout.no_movie,container,false);
+        }else {
+            view = inflater.inflate(R.layout.fragment_details, container, false);
+            ButterKnife.bind(this, view);
+        }
         return view;
     }
 
@@ -201,10 +201,10 @@ public class MovieDetailsFragment extends Fragment {
                             .appendEncodedPath(posterPath)
                             .build();
                     Log.i(LOG_TAG, "Get poster for movie " + originalTitle + ": " + url.toString());
-                    Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_big).error(R.drawable.noposter).into(mPoster);
+                    Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_big).error(R.drawable.no_poster).into(mPoster);
                 } else {
                     mPoster.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    mPoster.setImageResource(R.drawable.noposter);
+                    mPoster.setImageResource(R.drawable.no_poster);
                 }
 
 
@@ -349,7 +349,7 @@ public class MovieDetailsFragment extends Fragment {
                     final String site = c.getString(IDX_VIDEO_SITE);
                     Uri url = Uri.parse(String.format(YOUTUBE_IMAGE_URL, key));
                     Log.i(LOG_TAG, url.toString());
-                    Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_small).error(R.drawable.noposter).into(video);
+                    Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_small).error(R.drawable.no_poster).into(video);
                     if (c.isFirst()) {
                         mVideoUrl = YOUTUBE_BASE_URL + key;
                         if (mShareItem != null) {

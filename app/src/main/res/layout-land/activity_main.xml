@@ -15,5 +15,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:id="@+id/details_fragment_container"/>
+        android:id="@+id/details_fragment_container">
+            <include layout="@layout/no_movie"/>
+        </FrameLayout>
 </LinearLayout>

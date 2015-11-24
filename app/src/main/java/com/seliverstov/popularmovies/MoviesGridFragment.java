@@ -19,6 +19,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
@@ -59,6 +60,7 @@ public class MoviesGridFragment extends Fragment {
 
     @Bind(R.id.movies_grid) GridView mGridView;
     @Bind(R.id.movies_grid_progressbar) ProgressBar mProgressBar;
+    @Bind(R.id.movies_grid_no_movies) TextView mNoMovies;
 
     private SettingsManager mSettingsManager;
 
@@ -205,7 +207,14 @@ public class MoviesGridFragment extends Fragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) { mMoviesAdapter.swapCursor(data); }
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            if (data==null || data.getCount()==0){
+                mNoMovies.setVisibility(View.VISIBLE);
+            }else{
+                mNoMovies.setVisibility(View.GONE);
+            }
+            mMoviesAdapter.swapCursor(data);
+        }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) { mMoviesAdapter.swapCursor(null); }

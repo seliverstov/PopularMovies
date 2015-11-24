@@ -85,11 +85,11 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
             refresh();
         }
 
-        if (mTwoPane && mMovieUri !=null){
+        if (mTwoPane){
             MovieDetailsFragment mdf = (MovieDetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
             Uri oldUri = null;
             if (mdf!=null) oldUri = mdf.getMovieUri();
-            if (oldUri==null || mMovieUri!=oldUri){
+            if (mMovieUri!=oldUri){
                 Bundle argumants = new Bundle();
                 argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI, mMovieUri);
                 MovieDetailsFragment newFragment = new MovieDetailsFragment();

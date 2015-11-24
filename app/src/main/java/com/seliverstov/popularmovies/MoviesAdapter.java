@@ -3,13 +3,12 @@ package com.seliverstov.popularmovies;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.support.v4.content.ContextCompat;
+
 import com.squareup.picasso.Picasso;
 
 /**
@@ -28,11 +27,6 @@ public class MoviesAdapter extends CursorAdapter {
                 (int) context.getResources().getDimension(R.dimen.small_movie_poster_height)
         ));
         newView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            newView.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.touch_selector));
-        }else{
-            newView.setBackground(ContextCompat.getDrawable(context, R.drawable.touch_selector));
-        }
         return newView;
     }
 
@@ -45,10 +39,10 @@ public class MoviesAdapter extends CursorAdapter {
                     .appendPath(context.getString(R.string.small_movie_poster_size))
                     .appendEncodedPath(poster)
                     .build();
-            Picasso.with(context).load(url).placeholder(R.drawable.loading_small).error(R.drawable.noposter).into((ImageView)view);
+            Picasso.with(context).load(url).placeholder(R.drawable.loading_small).error(R.drawable.no_poster).into((ImageView)view);
         }else{
             ((ImageView)view).setScaleType(ImageView.ScaleType.CENTER_CROP);
-            ((ImageView)view).setImageResource(R.drawable.noposter);
+            ((ImageView)view).setImageResource(R.drawable.no_poster);
         }
     }
 }
