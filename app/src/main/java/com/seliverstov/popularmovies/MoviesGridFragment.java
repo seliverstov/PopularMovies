@@ -138,6 +138,7 @@ public class MoviesGridFragment extends Fragment {
     }
 
     void onSortOrderChanged(){
+        mGridView.clearChoices();
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();
 
         SettingsManager settingsManager = new SettingsManager(getActivity());
