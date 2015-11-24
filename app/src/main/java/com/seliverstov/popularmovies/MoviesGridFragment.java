@@ -11,7 +11,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,8 +56,11 @@ public class MoviesGridFragment extends Fragment {
 
     public static int IDX_ID = 0;
     public static int IDX_POSTER_PATH = 1;
+
     @Bind(R.id.movies_grid) GridView mGridView;
     @Bind(R.id.movies_grid_progressbar) ProgressBar mProgressBar;
+
+    private SettingsManager mSettingsManager;
 
     public interface ItemSelectedCallback{
         void onItemSelected(Uri uri);
@@ -68,7 +70,7 @@ public class MoviesGridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
 
-        View view = inflater.inflate(R.layout.fragment_grid, container, false);
+        final View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
         mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
@@ -88,9 +90,7 @@ public class MoviesGridFragment extends Fragment {
         mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
+            public void onScrollStateChanged(AbsListView view, int scrollState) {}
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -127,12 +127,13 @@ public class MoviesGridFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mSettingsManager = new SettingsManager(getActivity());
+
         getLoaderManager().initLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity()));
 
         getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity()));
-        SettingsManager settingsManager = new SettingsManager(getActivity());
-        long count = DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME);
-        if (count == 0 && !settingsManager.isFavoriteSortOrder()){
+
+        if (mSettingsManager.getCurrentPage()==0 && !mSettingsManager.isFavoriteSortOrder()){
             mProgressBar.setVisibility(View.VISIBLE);
             getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
         }
@@ -143,8 +144,7 @@ public class MoviesGridFragment extends Fragment {
 
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();
 
-        SettingsManager settingsManager = new SettingsManager(getActivity());
-        if (!settingsManager.isFavoriteSortOrder()) {
+        if (!mSettingsManager.isFavoriteSortOrder()) {
             if (LoaderUtils.isNetworkAvailable(getActivity())){
                 mProgressBar.setVisibility(View.VISIBLE);
                 getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
@@ -169,22 +169,14 @@ public class MoviesGridFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<List<Movie>> loader, final List<Movie> data) {
             Log.i(LOG_TAG,"onLoadFinished with result "+data);
-            new Handler().post(new Runnable(){
-                @Override
-                public void run() {
-                    mProgressBar.setVisibility(View.GONE);
-                    if (data==null){
-                        Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
+            mProgressBar.setVisibility(View.GONE);
+            if (data==null){
+                Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
-        public void onLoaderReset(Loader<List<Movie>> loader) {
-
-        }
+        public void onLoaderReset(Loader<List<Movie>> loader) {}
     };
 
     class CursorLoaderCallback implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -196,14 +188,12 @@ public class MoviesGridFragment extends Fragment {
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            SettingsManager settingsManager = new SettingsManager(mContext);
-
-            String selectionCriteria = settingsManager.isFavoriteSortOrder()?
+            String selectionCriteria = mSettingsManager.isFavoriteSortOrder()?
                     PopularMoviesContact.MovieEntry.COLUMN_FAVORITE+" is not null":
                     PopularMoviesContact.MovieEntry.COLUMN_SORT_ORDER+" = ?";
-            String[] selectionArgs = settingsManager.isFavoriteSortOrder()?
+            String[] selectionArgs = mSettingsManager.isFavoriteSortOrder()?
                     null:
-                    new String[]{settingsManager.getSortOrderForDb()};
+                    new String[]{mSettingsManager.getSortOrderForDb()};
 
             return new CursorLoader(
                     mContext,
@@ -211,17 +201,13 @@ public class MoviesGridFragment extends Fragment {
                     COLUMNS,
                     selectionCriteria,
                     selectionArgs,
-                    settingsManager.getSortOrderForDb());
+                    mSettingsManager.getSortOrderForDb());
         }
 
         @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            mMoviesAdapter.swapCursor(data);
-        }
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) { mMoviesAdapter.swapCursor(data); }
 
         @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-            mMoviesAdapter.swapCursor(null);
-        }
+        public void onLoaderReset(Loader<Cursor> loader) { mMoviesAdapter.swapCursor(null); }
     }
 }

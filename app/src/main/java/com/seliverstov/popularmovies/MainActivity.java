@@ -23,9 +23,11 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     private Integer mSortOrder;
     private boolean mTwoPane;
     private Uri mMovieUri;
+    private SettingsManager mSettingsManager;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState!=null){
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         }else{
             mTwoPane = false;
         }
+
+        mSettingsManager = new SettingsManager(this);
     }
 
 
@@ -75,11 +79,9 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     protected void onResume() {
         super.onResume();
 
-        SettingsManager settingsManager = new SettingsManager(this);
+        if (mSortOrder ==null) mSortOrder = mSettingsManager.getCurrentSortOrder();
 
-        if (mSortOrder ==null) mSortOrder = settingsManager.getCurrentSortOrder();
-
-        if (!mSortOrder.equals(settingsManager.getCurrentSortOrder())){
+        if (!mSortOrder.equals(mSettingsManager.getCurrentSortOrder())){
             refresh();
         }
 
@@ -114,11 +116,11 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     }
 
     protected void refresh(){
-        SettingsManager settingsManager = new SettingsManager(this);
-        mSortOrder = settingsManager.getCurrentSortOrder();
+        mSortOrder = mSettingsManager.getCurrentSortOrder();
+
         mMovieUri = null;
 
-        settingsManager.setCurrentPage(0);
+        mSettingsManager.setCurrentPage(0);
 
         Log.i(LOG_TAG, "Refresh database");
         long d = getContentResolver().delete(PopularMoviesContact.MovieEntry.CONTENT_URI, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is null", null);
