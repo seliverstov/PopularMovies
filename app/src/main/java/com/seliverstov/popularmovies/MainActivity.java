@@ -56,16 +56,24 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int oldSortOrder = mSettingsManager.getCurrentSortOrder();
         switch (item.getItemId()){
-            case R.id.action_settings:
-                Intent intent = new Intent(this,SettingsActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_refresh:
-                refresh();
-                return true;
+            case R.id.action_show_most_popular: {
+                mSettingsManager.setSortOrder(SettingsManager.SORT_ORDER_POPULARITY);
+                break;
+            }
+            case R.id.action_show_most_rated: {
+                mSettingsManager.setSortOrder(SettingsManager.SORT_ORDER_RATING);
+                break;
+            }
+            case R.id.action_show_favorite: {
+                mSettingsManager.setSortOrder(SettingsManager.SORT_ORDER_FAVORITE);
+                break;
+            }
             default: return super.onOptionsItemSelected(item);
         }
+        if (oldSortOrder!=mSettingsManager.getCurrentSortOrder()) refresh();
+        return true;
     }
 
     @Override
@@ -133,6 +141,10 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
         MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
         if (fragment!=null) fragment.onSortOrderChanged();
+
+        if (mTwoPane){
+            onItemSelected(mMovieUri);
+        }
     }
 
     @Override

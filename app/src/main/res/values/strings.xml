@@ -39,5 +39,8 @@
     <string name="no_videos">No trailers</string>
     <string name="no_movies">Try to refresh or change sort order.</string>
     <string name="select_movie">Select movie</string>
+    <string name="favorite">My favorites</string>
+    <string name="most_rated">Highest rated</string>
+    <string name="most_popular">Most popular</string>
 
 </resources>

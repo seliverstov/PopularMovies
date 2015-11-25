@@ -30,6 +30,10 @@ public class SettingsManager {
         return sortOrder;
     }
 
+    public void setSortOrder(int sortOrder){
+        mSp.edit().putString(mContext.getString(R.string.pref_sort_by_key),String.valueOf(sortOrder)).apply();
+    }
+
     public String getSortOrderForDb(){
         switch (getCurrentSortOrder()){
             case SORT_ORDER_FAVORITE:
