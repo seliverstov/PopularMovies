@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,13 +60,17 @@ public class MoviesGridFragment extends Fragment {
     public static int IDX_POSTER_PATH = 1;
 
     @Bind(R.id.movies_grid) GridView mGridView;
-    @Bind(R.id.movies_grid_progressbar) ProgressBar mProgressBar;
+    @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Bind(R.id.movies_grid_no_movies) TextView mNoMovies;
 
     private SettingsManager mSettingsManager;
 
     public interface ItemSelectedCallback{
         void onItemSelected(Uri uri);
+    }
+
+    public interface SwipeRefreshListener{
+        void onSwipeRefresh();
     }
 
     @Override
@@ -77,6 +82,15 @@ public class MoviesGridFragment extends Fragment {
         mMoviesAdapter = new MoviesAdapter(context, null, 0);
 
         ButterKnife.bind(this,view);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (mGridView.getFirstVisiblePosition()==0){
+                    ((SwipeRefreshListener)getActivity()).onSwipeRefresh();
+                }
+            }
+        });
 
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -112,7 +126,7 @@ public class MoviesGridFragment extends Fragment {
                         if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                             loading = true;
                             Log.i(LOG_TAG, "Load additional movies on scroll");
-                            getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
+                            loadMovies();
                             Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
                         }
                     }
@@ -123,6 +137,12 @@ public class MoviesGridFragment extends Fragment {
         mGridView.setAdapter(mMoviesAdapter);
 
         return view;
+    }
+
+    private void loadMovies() {
+        mNoMovies.setVisibility(View.GONE);
+        mSwipeRefreshLayout.setRefreshing(true);
+        getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
     }
 
     @Override
@@ -136,23 +156,25 @@ public class MoviesGridFragment extends Fragment {
         getLoaderManager().initLoader(TMDB_MOVIES_LOADER_ID, null, new MovieLoaderCallback(getActivity()));
 
         if (mSettingsManager.getCurrentPage()==0 && !mSettingsManager.isFavoriteSortOrder()){
-            mProgressBar.setVisibility(View.VISIBLE);
-            getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
+            loadMovies();
         }
     }
 
     void onSortOrderChanged(){
         mGridView.clearChoices();
+        mNoMovies.setVisibility(View.GONE);
 
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();
 
         if (!mSettingsManager.isFavoriteSortOrder()) {
             if (LoaderUtils.isNetworkAvailable(getActivity())){
-                mProgressBar.setVisibility(View.VISIBLE);
+                mSwipeRefreshLayout.setRefreshing(true);
                 getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
             }else{
                 Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
             }
+        }else{
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 
@@ -171,7 +193,7 @@ public class MoviesGridFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<List<Movie>> loader, final List<Movie> data) {
             Log.i(LOG_TAG,"onLoadFinished with result "+data);
-            mProgressBar.setVisibility(View.GONE);
+            mSwipeRefreshLayout.setRefreshing(false);
             if (data==null){
                 loading=false;
                 Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
@@ -209,7 +231,7 @@ public class MoviesGridFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            if (data==null || data.getCount()==0){
+            if ((data==null || data.getCount()==0) && !mSwipeRefreshLayout.isRefreshing()){
                 mNoMovies.setVisibility(View.VISIBLE);
             }else{
                 mNoMovies.setVisibility(View.GONE);

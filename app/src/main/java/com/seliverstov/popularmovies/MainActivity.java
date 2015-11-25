@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.model.SettingsManager;
 
-public class MainActivity extends AppCompatActivity implements MoviesGridFragment.ItemSelectedCallback{
+public class MainActivity extends AppCompatActivity implements MoviesGridFragment.ItemSelectedCallback, MoviesGridFragment.SwipeRefreshListener{
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
@@ -133,5 +133,10 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
         MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
         if (fragment!=null) fragment.onSortOrderChanged();
+    }
+
+    @Override
+    public void onSwipeRefresh() {
+        refresh();
     }
 }

@@ -11,18 +11,17 @@
         android:text="@string/no_movies"
         android:visibility="gone"
         android:id="@+id/movies_grid_no_movies"/>
-    <ProgressBar
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:id="@+id/movies_grid_progressbar"/>
-    <GridView
-        android:orientation="vertical" android:layout_width="match_parent"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/movies_grid"
-        android:verticalSpacing="@dimen/activity_vertical_margin"
-        android:numColumns="auto_fit"
-        android:stretchMode="columnWidth"
-        android:columnWidth="@dimen/small_movie_poster_width"/>
+        android:id="@+id/swipe_refresh_layout">
+        <GridView
+            android:orientation="vertical" android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/movies_grid"
+            android:verticalSpacing="@dimen/activity_vertical_margin"
+            android:numColumns="auto_fit"
+            android:stretchMode="columnWidth"
+            android:columnWidth="@dimen/small_movie_poster_width"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>
