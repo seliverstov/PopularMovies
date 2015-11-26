@@ -42,5 +42,8 @@
     <string name="favorite">My favorites</string>
     <string name="most_rated">Highest rated</string>
     <string name="most_popular">Most popular</string>
+    <string name="backdrop_size">w500</string>
+    <string name="no_overview">No overview</string>
+    <string name="overview">Overview</string>
 
 </resources>

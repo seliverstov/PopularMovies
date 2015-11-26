@@ -1,13 +1,18 @@
 package com.seliverstov.popularmovies;
 
+import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.model.SettingsManager;
@@ -35,8 +40,16 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
             if (savedInstanceState.containsKey(SAVED_MOVIE_URI)) mMovieUri = savedInstanceState.getParcelable(SAVED_MOVIE_URI);
         }
 
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+
+
+
         if (findViewById(R.id.details_fragment_container)!=null){
             mTwoPane = true;
+
+
             if (savedInstanceState==null){
                 getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new MovieDetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }

@@ -10,9 +10,13 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -62,7 +66,8 @@ public class MovieDetailsFragment extends Fragment {
             MovieEntry.COLUMN_VOTE_AVERAGE,
             MovieEntry.COLUMN_OVERVIEW,
             MovieEntry.COLUMN_POSTER_PATH,
-            MovieEntry.COLUMN_FAVORITE
+            MovieEntry.COLUMN_FAVORITE,
+            MovieEntry.COLUMN_BACKDROP_PATH
     };
 
     private static String[] REVIEW_COLUMNS = {
@@ -93,6 +98,7 @@ public class MovieDetailsFragment extends Fragment {
     private static int IDX_OVERVIEW = 4;
     private static int IDX_POSTER_PATH = 5;
     private static int IDX_FAVORITE = 6;
+    private static int IDX_BACKDROP_PATH = 7;
 
     private static int IDX_REVIEW_AUTHOR = 1;
     private static int IDX_REVIEW_CONTENT = 2;
@@ -108,13 +114,15 @@ public class MovieDetailsFragment extends Fragment {
     @Bind(R.id.movie_rating) TextView mRating;
     @Bind(R.id.movie_overview) TextView mOverview;
     @Bind(R.id.movie_poster) ImageView mPoster;
-    @Bind(R.id.favorite) ImageButton mFavorite;
+    @Bind(R.id.favorite) FloatingActionButton mFavorite;
     @Bind(R.id.movie_reviews) LinearLayout mReviews;
     @Bind(R.id.movie_videos) LinearLayout mVideos;
     @Bind(R.id.movie_videos_progressbar) ProgressBar mVideosProgressBar;
     @Bind(R.id.movie_reviews_progressbar) ProgressBar mReviewsProgressBar;
     @Bind(R.id.movie_has_no_videos) TextView mNoVideos;
     @Bind(R.id.movie_has_no_reviews) TextView mNoReviews;
+    @Bind(R.id.toolbar) Toolbar mToolbar;
+    @Bind(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
 
     private MenuItem mShareItem;
     private String mVideoUrl;
@@ -142,6 +150,10 @@ public class MovieDetailsFragment extends Fragment {
         }else {
             view = inflater.inflate(R.layout.fragment_details, container, false);
             ButterKnife.bind(this, view);
+            if (getActivity() instanceof MovieDetailsActivity) {
+                ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
         }
         return view;
     }
@@ -182,28 +194,31 @@ public class MovieDetailsFragment extends Fragment {
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
             if (c.moveToFirst()) {
                 String originalTitle = c.getString(IDX_ORIGINAL_TITLE);
-                mTitle.setText(originalTitle);
 
+                mCollapsingToolbar.setTitle(originalTitle);
                 String rd = c.getString(IDX_RELEASE_DATE);
-                rd = (rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "";
+                /*rd = (rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "";*/
 
-                mYear.setText(rd);
+                mTitle.setText(originalTitle);
+                mYear.setText("Release date: "+rd);
 
-                mRating.setText(new DecimalFormat("#.#").format(c.getDouble(IDX_VOTE_AVERAGE)) + "/10");
+                mRating.setText("Rating: "+new DecimalFormat("#.#").format(c.getDouble(IDX_VOTE_AVERAGE)) + "/10");
 
-                mOverview.setText(c.getString(IDX_OVERVIEW));
+                String overview = c.getString(IDX_OVERVIEW);
+                mOverview.setText(overview==null?getString(R.string.no_overview):overview);
 
+                String backdropPath = c.getString(IDX_BACKDROP_PATH);
                 String posterPath = c.getString(IDX_POSTER_PATH);
-                if (posterPath != null) {
+                if (backdropPath != null || posterPath!=null) {
                     Uri url = Uri.parse(getString(R.string.movie_poster_base_url))
                             .buildUpon()
-                            .appendPath(getString(R.string.big_movie_poster_size))
-                            .appendEncodedPath(posterPath)
+                            .appendPath(getString(R.string.backdrop_size))
+                            .appendEncodedPath(backdropPath==null?posterPath:backdropPath)
                             .build();
                     Log.i(LOG_TAG, "Get poster for movie " + originalTitle + ": " + url.toString());
-                    Picasso.with(getActivity()).load(url).placeholder(R.drawable.loading_big).error(R.drawable.no_poster).into(mPoster);
+                    Picasso.with(getActivity()).load(url).error(R.drawable.no_poster).into(mPoster);
                 } else {
-                    mPoster.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    mPoster.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     mPoster.setImageResource(R.drawable.no_poster);
                 }
 
