@@ -1,6 +1,5 @@
 package com.seliverstov.popularmovies;
 
-import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,11 +7,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.model.SettingsManager;
@@ -68,6 +64,15 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_share);
+        if (item != null && (!mTwoPane || mMovieUri==null)){
+            menu.removeItem(item.getItemId());
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int oldSortOrder = mSettingsManager.getCurrentSortOrder();
         switch (item.getItemId()){
@@ -115,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
                 argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI, mMovieUri);
                 MovieDetailsFragment newFragment = new MovieDetailsFragment();
                 newFragment.setArguments(argumants);
-                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,newFragment,MOVIE_DETAILS_FRAGMENT_TAG).commit();
+                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container, newFragment, MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }
         }
     }
