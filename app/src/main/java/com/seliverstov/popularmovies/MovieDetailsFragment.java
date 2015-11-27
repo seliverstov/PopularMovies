@@ -177,7 +177,7 @@ public class MovieDetailsFragment extends Fragment {
         mShareItem = menu.findItem(R.id.action_share);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType(INTENT_TYPE);
-        intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl);
+        intent.putExtra(Intent.EXTRA_TEXT, mVideoUrl==null?getActivity().getString(R.string.no_videos):mVideoUrl);
         ((ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem)).setShareIntent(intent);
     }
 
