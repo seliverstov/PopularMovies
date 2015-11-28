@@ -17,7 +17,7 @@
         android:fitsSystemWindows="true"
         android:paddingTop="@dimen/minimal_padding">
         <fragment
-            class="com.seliverstov.popularmovies.MoviesGridFragment"
+            class="com.seliverstov.popularmovies.fragment.GridFragment"
             tools:layout="@layout/fragment_grid"
             android:layout_width="0dp"
             android:layout_height="match_parent"

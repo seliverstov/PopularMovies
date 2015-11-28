@@ -1,4 +1,4 @@
-package com.seliverstov.popularmovies;
+package com.seliverstov.popularmovies.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;

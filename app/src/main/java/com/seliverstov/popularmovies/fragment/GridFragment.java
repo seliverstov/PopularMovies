@@ -1,9 +1,8 @@
-package com.seliverstov.popularmovies;
+package com.seliverstov.popularmovies.fragment;
 
 
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -12,19 +11,16 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seliverstov.popularmovies.adapter.MoviesAdapter;
+import com.seliverstov.popularmovies.R;
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.db.PopularMoviesDbHelper;
 import com.seliverstov.popularmovies.loader.LoaderUtils;
@@ -41,8 +37,8 @@ import butterknife.ButterKnife;
 /**
  * Created by a.g.seliverstov on 12.10.2015.
  */
-public class MoviesGridFragment extends Fragment {
-    private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
+public class GridFragment extends Fragment {
+    private static final String LOG_TAG = GridFragment.class.getSimpleName();
 
 
     private boolean loading = false;
@@ -50,7 +46,7 @@ public class MoviesGridFragment extends Fragment {
     private int TMDB_MOVIES_LOADER_ID = 0;
     private int CURSOR_MOVIES_LOADER_ID = 1;
 
-    private MovieRecyclerViewAdapter mMoviesAdapter;
+    private MoviesAdapter mMoviesAdapter;
 
     private static String[] COLUMNS = {
             PopularMoviesContact.MovieEntry._ID,
@@ -80,7 +76,7 @@ public class MoviesGridFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
-        mMoviesAdapter = new MovieRecyclerViewAdapter(context,null);
+        mMoviesAdapter = new MoviesAdapter(context,null);
 
         ButterKnife.bind(this, view);
 
@@ -139,7 +135,7 @@ public class MoviesGridFragment extends Fragment {
         }
     }
 
-    void onSortOrderChanged(){
+    public void onSortOrderChanged(){
         mNoMovies.setVisibility(View.GONE);
 
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();

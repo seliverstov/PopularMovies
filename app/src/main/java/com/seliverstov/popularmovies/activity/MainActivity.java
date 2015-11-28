@@ -1,4 +1,4 @@
-package com.seliverstov.popularmovies;
+package com.seliverstov.popularmovies.activity;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -10,10 +10,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.seliverstov.popularmovies.fragment.DetailsFragment;
+import com.seliverstov.popularmovies.fragment.GridFragment;
+import com.seliverstov.popularmovies.R;
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.model.SettingsManager;
 
-public class MainActivity extends AppCompatActivity implements MoviesGridFragment.ItemSelectedCallback, MoviesGridFragment.SwipeRefreshListener{
+public class MainActivity extends AppCompatActivity implements GridFragment.ItemSelectedCallback, GridFragment.SwipeRefreshListener{
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     public static final String SAVED_SORT_ORDER = MainActivity.class.getSimpleName()+".SAVED_SORT_ORDER";
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
 
 
             if (savedInstanceState==null || getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG)==null){
-                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new MovieDetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
+                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new DetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }
         }else{
             mTwoPane = false;
@@ -112,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         }
 
         if (mTwoPane){
-            MovieDetailsFragment mdf = (MovieDetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
+            DetailsFragment mdf = (DetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
             Uri oldUri = null;
             if (mdf!=null) oldUri = mdf.getMovieUri();
             if (mMovieUri!=oldUri){
                 Bundle argumants = new Bundle();
-                argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI, mMovieUri);
-                MovieDetailsFragment newFragment = new MovieDetailsFragment();
+                argumants.putParcelable(DetailsFragment.MOVIE_DETAILS_URI, mMovieUri);
+                DetailsFragment newFragment = new DetailsFragment();
                 newFragment.setArguments(argumants);
                 getFragmentManager().beginTransaction().replace(R.id.details_fragment_container, newFragment, MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }
@@ -130,12 +133,12 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         mMovieUri = uri;
         if (mTwoPane){
             Bundle argumants = new Bundle();
-            argumants.putParcelable(MovieDetailsFragment.MOVIE_DETAILS_URI,uri);
-            MovieDetailsFragment mdf = new MovieDetailsFragment();
+            argumants.putParcelable(DetailsFragment.MOVIE_DETAILS_URI,uri);
+            DetailsFragment mdf = new DetailsFragment();
             mdf.setArguments(argumants);
             getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf,MOVIE_DETAILS_FRAGMENT_TAG).commit();
         }else{
-            Intent intent = new Intent(this,MovieDetailsActivity.class);
+            Intent intent = new Intent(this,DetailsActivity.class);
             intent.setData(uri);
             startActivity(intent);
         }
@@ -157,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
         long u = getContentResolver().update(PopularMoviesContact.MovieEntry.CONTENT_URI, cv, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is not null", null);
         Log.i(LOG_TAG, u+" records were updated");
 
-        MoviesGridFragment fragment = (MoviesGridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
+        GridFragment fragment = (GridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
         if (fragment!=null) fragment.onSortOrderChanged();
 
         if (mTwoPane){

@@ -1,4 +1,4 @@
-package com.seliverstov.popularmovies;
+package com.seliverstov.popularmovies.fragment;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
@@ -24,13 +24,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seliverstov.popularmovies.R;
+import com.seliverstov.popularmovies.activity.DetailsActivity;
 import com.seliverstov.popularmovies.loader.ReviewsLoader;
 import com.seliverstov.popularmovies.loader.VideosLoader;
 import com.seliverstov.popularmovies.model.SettingsManager;
@@ -49,8 +50,8 @@ import static com.seliverstov.popularmovies.db.PopularMoviesContact.*;
 /**
  * Created by a.g.seliverstov on 15.10.2015.
  */
-public class MovieDetailsFragment extends Fragment {
-    public static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
+public class DetailsFragment extends Fragment {
+    public static final String LOG_TAG = DetailsFragment.class.getSimpleName();
 
     public static final String MOVIE_DETAILS_URI = "MOVIE_DETAILS_URI";
     public static final String YOUTUBE_BASE_URL = "http://www.youtube.com/watch?v=";
@@ -150,7 +151,7 @@ public class MovieDetailsFragment extends Fragment {
         }else {
             view = inflater.inflate(R.layout.fragment_details, container, false);
             ButterKnife.bind(this, view);
-            if (getActivity() instanceof MovieDetailsActivity) {
+            if (getActivity() instanceof DetailsActivity) {
                 ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
