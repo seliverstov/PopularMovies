@@ -16,13 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.DetailsActivity" android:label="@string/details" android:parentActivityName=".activity.MainActivity">
+        <activity android:name=".activity.DetailsActivity" android:label="@string/details">
             <meta-data android:name="android.support.PARENT_ACTIVITY" android:value=".activity.MainActivity"/>
         </activity>
 
         <provider
             android:authorities="com.seliverstov.popularmovies.provider"
-            android:name="com.seliverstov.popularmovies.db.PopularMoviesProvider"/>
+            android:name="com.seliverstov.popularmovies.db.PopularMoviesProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

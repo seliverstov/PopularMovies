@@ -1,9 +1,11 @@
 package com.seliverstov.popularmovies.db;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 
@@ -72,6 +74,7 @@ public class TestUtils {
         return row;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static void validateRecord(Cursor c, ContentValues row) {
         Set<Map.Entry<String, Object>> vs = row.valueSet();
         for(Map.Entry<String, Object> e:vs){

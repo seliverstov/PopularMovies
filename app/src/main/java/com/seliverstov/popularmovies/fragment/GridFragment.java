@@ -1,15 +1,16 @@
 package com.seliverstov.popularmovies.fragment;
 
 
-import android.app.Fragment;
-import android.app.LoaderManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Loader;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -87,7 +88,7 @@ public class GridFragment extends Fragment {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (!recyclerView.canScrollVertically(1) && !loading){
+                if (!ViewCompat.canScrollVertically(recyclerView,1) && !loading){
                     SettingsManager settingsManager = new SettingsManager(getActivity());
                     if (!settingsManager.isFavoriteSortOrder() && LoaderUtils.isNetworkAvailable(getActivity())) {
                         loading = true;
@@ -95,7 +96,7 @@ public class GridFragment extends Fragment {
                         loadMovies();
                         Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
                     }
-                }else if (recyclerView.canScrollVertically(1) && loading){
+                }else if (ViewCompat.canScrollVertically(recyclerView,1) && loading){
                     loading = false;
                     Log.i(LOG_TAG, "Load on scroll is finished");
                 }

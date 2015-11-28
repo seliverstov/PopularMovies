@@ -1,13 +1,12 @@
 package com.seliverstov.popularmovies.loader;
 
-import android.content.AsyncTaskLoader;
+import android.support.v4.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 
 import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.rest.TMDBClient;
-import com.seliverstov.popularmovies.rest.model.Review;
 import com.seliverstov.popularmovies.rest.model.Video;
 
 import java.util.List;

@@ -20,7 +20,7 @@ public class DetailsActivity extends AppCompatActivity {
             arguments.putParcelable(DetailsFragment.MOVIE_DETAILS_URI, getIntent().getData());
             DetailsFragment mdf = new DetailsFragment();
             mdf.setArguments(arguments);
-            getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf).commit();
         }
     }
 }

@@ -47,10 +47,8 @@ public class MainActivity extends AppCompatActivity implements GridFragment.Item
 
         if (findViewById(R.id.details_fragment_container)!=null){
             mTwoPane = true;
-
-
-            if (savedInstanceState==null || getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG)==null){
-                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new DetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
+            if (savedInstanceState==null || getSupportFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG)==null){
+                getSupportFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new DetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }
         }else{
             mTwoPane = false;
@@ -115,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.Item
         }
 
         if (mTwoPane){
-            DetailsFragment mdf = (DetailsFragment)getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
+            DetailsFragment mdf = (DetailsFragment)getSupportFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG);
             Uri oldUri = null;
             if (mdf!=null) oldUri = mdf.getMovieUri();
             if (mMovieUri!=oldUri){
@@ -123,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.Item
                 argumants.putParcelable(DetailsFragment.MOVIE_DETAILS_URI, mMovieUri);
                 DetailsFragment newFragment = new DetailsFragment();
                 newFragment.setArguments(argumants);
-                getFragmentManager().beginTransaction().replace(R.id.details_fragment_container, newFragment, MOVIE_DETAILS_FRAGMENT_TAG).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.details_fragment_container, newFragment, MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }
         }
     }
@@ -136,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.Item
             argumants.putParcelable(DetailsFragment.MOVIE_DETAILS_URI,uri);
             DetailsFragment mdf = new DetailsFragment();
             mdf.setArguments(argumants);
-            getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf,MOVIE_DETAILS_FRAGMENT_TAG).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.details_fragment_container,mdf,MOVIE_DETAILS_FRAGMENT_TAG).commit();
         }else{
             Intent intent = new Intent(this,DetailsActivity.class);
             intent.setData(uri);
@@ -160,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.Item
         long u = getContentResolver().update(PopularMoviesContact.MovieEntry.CONTENT_URI, cv, PopularMoviesContact.MovieEntry.COLUMN_FAVORITE + " is not null", null);
         Log.i(LOG_TAG, u+" records were updated");
 
-        GridFragment fragment = (GridFragment)getFragmentManager().findFragmentById(R.id.grid_fragment);
+        GridFragment fragment = (GridFragment)getSupportFragmentManager().findFragmentById(R.id.grid_fragment);
         if (fragment!=null) fragment.onSortOrderChanged();
 
         if (mTwoPane){
