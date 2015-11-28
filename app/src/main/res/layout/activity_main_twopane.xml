@@ -3,7 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/main_container"
+    android:fitsSystemWindows="true">
 
     <include layout="@layout/toolbar"/>
 
@@ -12,21 +14,23 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:id="@+id/two_pane_container"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:paddingTop="2dp">
+        android:fitsSystemWindows="true"
+        android:paddingTop="@dimen/minimal_padding">
         <fragment
             class="com.seliverstov.popularmovies.MoviesGridFragment"
             tools:layout="@layout/fragment_grid"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:id="@+id/grid_fragment"/>
+            android:id="@+id/grid_fragment"
+            />
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clipToPadding="false"
+            android:fitsSystemWindows="true"
             android:id="@+id/details_fragment_container">
-                <include layout="@layout/no_movie"/>
             </FrameLayout>
     </LinearLayout>
 

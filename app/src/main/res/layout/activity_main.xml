@@ -3,15 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/main_container">
 
     <include layout="@layout/toolbar"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:paddingTop="2dp">
+        android:paddingTop="@dimen/minimal_padding">
         <fragment
             class="com.seliverstov.popularmovies.MoviesGridFragment"
             tools:layout="@layout/fragment_grid"

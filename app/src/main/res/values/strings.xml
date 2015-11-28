@@ -4,7 +4,7 @@
     <string name="settings">Settings</string>
     <string name="action_refresh">Refresh</string>
     <string name="refresh">Refresh</string>
-    <string name="pref_sort_by_title">Sort by</string>
+
     <string name="pref_sort_by_key" translatable="false">sort_by</string>
     <string name="pref_sort_by_default" translatable="false">0</string>
 
@@ -17,19 +17,9 @@
     <string name="details">Details</string>
     <string name="loading">Loading</string>
 
-    <string-array name="pref_sort_by_entries">
-        <item>Popularity</item>
-        <item>Rating</item>
-        <item>Favorite</item>
-    </string-array>
-    <string-array name="pref_sort_by_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-    <string name="movie_poster_base_url">http://image.tmdb.org/t/p/</string>
+    <string name="movie_poster_base_url" translatable="false">http://image.tmdb.org/t/p/</string>
     <string name="small_movie_poster_size" translatable="false">w185</string>
-    <string name="big_movie_poster_size">w342</string>
+    <string name="big_movie_poster_size" translatable="false">w342</string>
     <string name="action_share">Share</string>
     <string name="share_trailer">Share link to first trailer</string>
     <string name="trailers">Trailers</string>
@@ -37,12 +27,12 @@
     <string name="no_youtube_video">Sorry :( I can\'t play video from %s site. Only youtube is supported now.</string>
     <string name="no_reviews">No reviews</string>
     <string name="no_videos">No trailers</string>
-    <string name="no_movies">Try to refresh or change sort order.</string>
+    <string name="no_movies">No movies. Try to refresh or change sort order.</string>
     <string name="select_movie">Select movie</string>
     <string name="favorite">My favorites</string>
     <string name="most_rated">Highest rated</string>
     <string name="most_popular">Most popular</string>
-    <string name="backdrop_size">w500</string>
+    <string name="backdrop_size" translatable="false">w500</string>
     <string name="no_overview">No overview</string>
     <string name="overview">Overview</string>
 

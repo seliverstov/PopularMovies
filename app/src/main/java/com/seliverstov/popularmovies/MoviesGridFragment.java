@@ -12,6 +12,8 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,14 +44,13 @@ import butterknife.ButterKnife;
 public class MoviesGridFragment extends Fragment {
     private static final String LOG_TAG = MoviesGridFragment.class.getSimpleName();
 
-    private int VISIBLE_THRESHOLD = 2;
-    private boolean loading = true;
-    private int previousTotalItemCount = 0;
+
+    private boolean loading = false;
 
     private int TMDB_MOVIES_LOADER_ID = 0;
     private int CURSOR_MOVIES_LOADER_ID = 1;
 
-    private MoviesAdapter mMoviesAdapter;
+    private MovieRecyclerViewAdapter mMoviesAdapter;
 
     private static String[] COLUMNS = {
             PopularMoviesContact.MovieEntry._ID,
@@ -59,7 +60,7 @@ public class MoviesGridFragment extends Fragment {
     public static int IDX_ID = 0;
     public static int IDX_POSTER_PATH = 1;
 
-    @Bind(R.id.movies_grid) GridView mGridView;
+    @Bind(R.id.movies_grid) RecyclerView mRecyclerView;
     @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Bind(R.id.movies_grid_no_movies) TextView mNoMovies;
 
@@ -79,62 +80,40 @@ public class MoviesGridFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_grid, container, false);
 
-        mMoviesAdapter = new MoviesAdapter(context, null, 0);
+        mMoviesAdapter = new MovieRecyclerViewAdapter(context,null);
 
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
+
+        mRecyclerView.setHasFixedSize(true);
+
+        mRecyclerView.setAdapter(mMoviesAdapter);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (!recyclerView.canScrollVertically(1) && !loading){
+                    SettingsManager settingsManager = new SettingsManager(getActivity());
+                    if (!settingsManager.isFavoriteSortOrder() && LoaderUtils.isNetworkAvailable(getActivity())) {
+                        loading = true;
+                        Log.i(LOG_TAG, "Load additional movies on scroll");
+                        loadMovies();
+                        Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
+                    }
+                }else if (recyclerView.canScrollVertically(1) && loading){
+                    loading = false;
+                    Log.i(LOG_TAG, "Load on scroll is finished");
+                }
+            }
+        });
+
+        mSwipeRefreshLayout.setProgressViewOffset(true,getResources().getInteger(R.integer.spinner_offset_start),getResources().getInteger(R.integer.spinner_offset_end));
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (mGridView.getFirstVisiblePosition()==0){
-                    ((SwipeRefreshListener)getActivity()).onSwipeRefresh();
-                }
+                ((SwipeRefreshListener)getActivity()).onSwipeRefresh();
             }
         });
-
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Cursor c = (Cursor) mMoviesAdapter.getItem(position);
-                if (c != null && c.getCount() > 0) {
-                    ItemSelectedCallback collback = (ItemSelectedCallback) getActivity();
-                    collback.onItemSelected(ContentUris.withAppendedId(PopularMoviesContact.MovieEntry.CONTENT_URI, c.getLong(IDX_ID)));
-                }
-            }
-        });
-
-        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {}
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                SettingsManager settingsManager = new SettingsManager(getActivity());
-                if (totalItemCount < previousTotalItemCount) {
-                    previousTotalItemCount = totalItemCount;
-                    if (totalItemCount == 0) loading = true;
-                }
-
-                if (loading && totalItemCount > previousTotalItemCount) {
-                    loading = false;
-                    previousTotalItemCount = totalItemCount;
-                    Log.i(LOG_TAG, "Load on scroll is finished");
-                }
-                if (!settingsManager.isFavoriteSortOrder() && LoaderUtils.isNetworkAvailable(getActivity())) {
-                    if (!loading) {
-                        if (totalItemCount - visibleItemCount <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
-                            loading = true;
-                            Log.i(LOG_TAG, "Load additional movies on scroll");
-                            loadMovies();
-                            Log.i(LOG_TAG, "Database size:" + DatabaseUtils.queryNumEntries((new PopularMoviesDbHelper(getActivity())).getReadableDatabase(), PopularMoviesContact.MovieEntry.TABLE_NAME));
-                        }
-                    }
-                }
-            }
-        });
-
-        mGridView.setAdapter(mMoviesAdapter);
 
         return view;
     }
@@ -161,7 +140,6 @@ public class MoviesGridFragment extends Fragment {
     }
 
     void onSortOrderChanged(){
-        mGridView.clearChoices();
         mNoMovies.setVisibility(View.GONE);
 
         getLoaderManager().restartLoader(CURSOR_MOVIES_LOADER_ID, null, new CursorLoaderCallback(getActivity())).forceLoad();
@@ -171,6 +149,7 @@ public class MoviesGridFragment extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(true);
                 getLoaderManager().getLoader(TMDB_MOVIES_LOADER_ID).forceLoad();
             }else{
+                mSwipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getActivity(), getString(R.string.cant_load_movies), Toast.LENGTH_SHORT).show();
             }
         }else{
@@ -201,7 +180,9 @@ public class MoviesGridFragment extends Fragment {
         }
 
         @Override
-        public void onLoaderReset(Loader<List<Movie>> loader) {}
+        public void onLoaderReset(Loader<List<Movie>> loader) {
+            loading=false;
+        }
     };
 
     class CursorLoaderCallback implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -240,6 +221,8 @@ public class MoviesGridFragment extends Fragment {
         }
 
         @Override
-        public void onLoaderReset(Loader<Cursor> loader) { mMoviesAdapter.swapCursor(null); }
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mMoviesAdapter.swapCursor(null);
+        }
     }
 }

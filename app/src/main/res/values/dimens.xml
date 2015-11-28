@@ -7,4 +7,8 @@
     <dimen name="big_movie_poster_width">342px</dimen>
     <dimen name="big_movie_poster_height">513px</dimen>
     <dimen name="horizontal_line_height">2dp</dimen>
+    <dimen name="minimal_margin">2dp</dimen>
+    <dimen name="minimal_padding">2dp</dimen>
+    <dimen name="backdrop_height">250dp</dimen>
+    <dimen name="card_corner_radius">4dp</dimen>
 </resources>

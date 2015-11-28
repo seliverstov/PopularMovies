@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements MoviesGridFragmen
             mTwoPane = true;
 
 
-            if (savedInstanceState==null){
+            if (savedInstanceState==null || getFragmentManager().findFragmentByTag(MOVIE_DETAILS_FRAGMENT_TAG)==null){
                 getFragmentManager().beginTransaction().replace(R.id.details_fragment_container,new MovieDetailsFragment(),MOVIE_DETAILS_FRAGMENT_TAG).commit();
             }
         }else{
