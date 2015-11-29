@@ -1,22 +1,39 @@
-package com.seliverstov.popularmovies.adapter;
+package com.skyfishjy;
 
-
+/*
+ * Copyright (C) 2014 skyfish.jy@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
-import android.provider.BaseColumns;
 import android.support.v7.widget.RecyclerView;
 
 /**
- * Created by alexander on 28.11.2015.
+ * Created by skyfishjy on 10/31/14.
  */
 
-public abstract class CursorRecyclerViewAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T> {
+public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private Context mContext;
+
     private Cursor mCursor;
+
     private boolean mDataValid;
+
     private int mRowIdColumn;
 
     private DataSetObserver mDataSetObserver;
@@ -25,11 +42,15 @@ public abstract class CursorRecyclerViewAdapter<T extends RecyclerView.ViewHolde
         mContext = context;
         mCursor = cursor;
         mDataValid = cursor != null;
-        mRowIdColumn = mDataValid ? mCursor.getColumnIndex(BaseColumns._ID) : -1;
+        mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1;
         mDataSetObserver = new NotifyingDataSetObserver();
         if (mCursor != null) {
             mCursor.registerDataSetObserver(mDataSetObserver);
         }
+    }
+
+    public Cursor getCursor() {
+        return mCursor;
     }
 
     @Override
@@ -53,23 +74,23 @@ public abstract class CursorRecyclerViewAdapter<T extends RecyclerView.ViewHolde
         super.setHasStableIds(true);
     }
 
-    public abstract void onBindViewHolder(T viewHolder, Cursor cursor);
+    public abstract void onBindViewHolder(VH viewHolder, Cursor cursor);
 
     @Override
-    public void onBindViewHolder(T viewHolder, int position) {
+    public void onBindViewHolder(VH viewHolder, int position) {
         if (!mDataValid) {
-            throw new IllegalStateException("This method should be called only when the cursor is valid");
+            throw new IllegalStateException("this should only be called when the cursor is valid");
         }
         if (!mCursor.moveToPosition(position)) {
-            throw new IllegalStateException("Could not move cursor to position " + position);
+            throw new IllegalStateException("couldn't move cursor to position " + position);
         }
         onBindViewHolder(viewHolder, mCursor);
     }
 
-    public Cursor getCursor() {
-        return mCursor;
-    }
-
+    /**
+     * Change the underlying cursor to a new cursor. If there is an existing cursor it will be
+     * closed.
+     */
     public void changeCursor(Cursor cursor) {
         Cursor old = swapCursor(cursor);
         if (old != null) {
@@ -77,6 +98,11 @@ public abstract class CursorRecyclerViewAdapter<T extends RecyclerView.ViewHolde
         }
     }
 
+    /**
+     * Swap in a new Cursor, returning the old Cursor.  Unlike
+     * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
+     * closed.
+     */
     public Cursor swapCursor(Cursor newCursor) {
         if (newCursor == mCursor) {
             return null;
@@ -90,13 +116,14 @@ public abstract class CursorRecyclerViewAdapter<T extends RecyclerView.ViewHolde
             if (mDataSetObserver != null) {
                 mCursor.registerDataSetObserver(mDataSetObserver);
             }
-            mRowIdColumn = newCursor.getColumnIndexOrThrow(BaseColumns._ID);
+            mRowIdColumn = newCursor.getColumnIndexOrThrow("_id");
             mDataValid = true;
             notifyDataSetChanged();
         } else {
             mRowIdColumn = -1;
             mDataValid = false;
             notifyDataSetChanged();
+            //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
         }
         return oldCursor;
     }
@@ -114,6 +141,7 @@ public abstract class CursorRecyclerViewAdapter<T extends RecyclerView.ViewHolde
             super.onInvalidated();
             mDataValid = false;
             notifyDataSetChanged();
+            //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
         }
     }
 }

@@ -15,6 +15,8 @@ import com.seliverstov.popularmovies.db.PopularMoviesContact;
 import com.seliverstov.popularmovies.fragment.GridFragment;
 import com.squareup.picasso.Picasso;
 
+import com.skyfishjy.CursorRecyclerViewAdapter;
+
 /**
  * Created by alexander on 28.11.2015.
  */

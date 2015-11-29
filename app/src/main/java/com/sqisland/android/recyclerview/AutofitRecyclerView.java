@@ -1,4 +1,4 @@
-package com.seliverstov.popularmovies.view;
+package com.sqisland.android.recyclerview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -6,9 +6,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
-/**
- * Created by alexander on 28.11.2015.
- */
 public class AutofitRecyclerView extends RecyclerView {
     private GridLayoutManager manager;
     private int columnWidth = -1;
