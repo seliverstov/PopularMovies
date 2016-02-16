@@ -18,7 +18,9 @@ then return to project's root folder and run
 ```
 $ gradle installDebug
 ```
+###License
 
+The contents of this repository are covered under the [MIT License](http://choosealicense.com/licenses/mit/).
 
 
 
